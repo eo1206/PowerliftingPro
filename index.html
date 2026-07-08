@@ -60,7 +60,6 @@
           <p>Rutina actual</p>
           <h2>Powerlifting</h2>
         </div>
-        <span>Día 1</span>
       </section>
 
       <section class="stats">
@@ -125,12 +124,42 @@
         <h2>Últimos registros</h2>
       </section>
 
+      <section id="inicio" class="page active-page">
+  <!-- aquí va registrar ejercicio y últimos registros -->
+</section>
+
+<section id="rutina" class="page">
+  <section class="card">
+    <h2>Rutinas</h2>
+
+    <button id="rutinaAuto" type="button">Generar rutina automática</button>
+    <button id="rutinaManual" type="button">Crear rutina manual</button>
+
+    <div id="rutinaResultado"></div>
+  </section>
+</section>
+
+<section id="progreso" class="page">
+  <section class="card">
+    <h2>Progreso</h2>
+    <p>Aquí después podemos mostrar PRs, volumen semanal y gráficas.</p>
+  </section>
+</section>
+
+<section id="perfil" class="page">
+  <section class="card">
+    <h2>Perfil</h2>
+    <p>Usuario: <span id="nombreUsuario"></span></p>
+    <button id="cerrarSesion" type="button" class="logout">Salir</button>
+  </section>
+</section>
+
       <nav class="bottom-nav">
-        <a href="#" class="active">Inicio</a>
-        <a href="#">Rutina</a>
-        <a href="#">Progreso</a>
-        <a href="#">Perfil</a>
-      </nav>
+  <a href="#" class="active" data-page="inicio">Inicio</a>
+  <a href="#" data-page="rutina">Rutina</a>
+  <a href="#" data-page="progreso">Progreso</a>
+  <a href="#" data-page="perfil">Perfil</a>
+</nav>
 
     </main>
   </section>

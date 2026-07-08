@@ -128,3 +128,58 @@ async function borrarRegistro(uid, id) {
     console.error(error);
   }
 }
+
+
+const navLinks = document.querySelectorAll(".bottom-nav a");
+const pages = document.querySelectorAll(".page");
+
+navLinks.forEach((link) => {
+  link.addEventListener("click", (e) => {
+    e.preventDefault();
+
+    navLinks.forEach((a) => a.classList.remove("active"));
+    link.classList.add("active");
+
+    const pageId = link.dataset.page;
+
+    pages.forEach((page) => {
+      page.classList.remove("active-page");
+    });
+
+    document.getElementById(pageId).classList.add("active-page");
+  });
+});
+
+const rutinaAuto = document.getElementById("rutinaAuto");
+const rutinaResultado = document.getElementById("rutinaResultado");
+
+rutinaAuto.addEventListener("click", () => {
+  rutinaResultado.innerHTML = `
+    <div class="exercise">
+      <div>
+        <h3>Día 1 - Fuerza</h3>
+        <p>Sentadilla 5x3 al 85%</p>
+        <p>Press banca 5x3 al 85%</p>
+        <p>Peso muerto 3x3 al 80%</p>
+      </div>
+    </div>
+
+    <div class="exercise">
+      <div>
+        <h3>Día 2 - Técnica</h3>
+        <p>Sentadilla pausa 4x4</p>
+        <p>Banca agarre cerrado 4x6</p>
+        <p>Remo 4x10</p>
+      </div>
+    </div>
+
+    <div class="exercise">
+      <div>
+        <h3>Día 3 - Volumen</h3>
+        <p>Sentadilla 4x6 al 70%</p>
+        <p>Press banca 4x6 al 70%</p>
+        <p>Peso muerto 3x5 al 75%</p>
+      </div>
+    </div>
+  `;
+});
