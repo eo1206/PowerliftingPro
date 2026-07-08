@@ -46,8 +46,13 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
+function calcular1RM(peso, reps) {
+    return peso * 36 / (37 - reps);
+}
 
-  let maxpeso = peso;
+const rm = calcular1RM(peso, reps);
+
+  let maxpeso = rm;
 
   const volumen = peso * reps * series;
 
