@@ -34,10 +34,11 @@ onAuthStateChanged(auth, (user) => {
 });
 
 function calcular1RM(peso, reps) {
-  return peso * 36 / (37 - reps);
+  const resultado = peso * 36 / (37 - reps);
+  return Number(resultado.toFixed(1));
 }
 
-async function obtenerPR(ejercicioBuscado) {
+async function obtenerMaximoPorEjercicio(ejercicioBuscado) {
   const consulta = query(
     collection(db, "usuarios", usuarioActual.uid, "registros"),
     where("ejercicio", "==", ejercicioBuscado)
@@ -45,17 +46,18 @@ async function obtenerPR(ejercicioBuscado) {
 
   const resultados = await getDocs(consulta);
 
-  let mejorPR = 0;
+  let maximo = 0;
 
   resultados.forEach((documento) => {
     const datos = documento.data();
+    const valor = Number(datos.maxpeso);
 
-    if (datos.maxpeso > mejorPR) {
-      mejorPR = datos.maxpeso;
+    if (valor > maximo) {
+      maximo = valor;
     }
   });
 
-  return mejorPR;
+  return maximo;
 }
 
 form.addEventListener("submit", async (e) => {
@@ -73,21 +75,26 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
-  const maxpeso = Number(calcular1RM(peso, reps).toFixed(1));
+  const maxpeso = calcular1RM(peso, reps);
   const volumen = peso * reps * series;
 
-  const prAnterior = await obtenerPR(ejercicio);
-  const esPR = maxpeso > prAnterior;
+  const maximoAnterior = await obtenerMaximoPorEjercicio(ejercicio);
+
+  let esPR = false;
+
+  if (maxpeso > maximoAnterior) {
+    esPR = true;
+  }
 
   await addDoc(collection(db, "usuarios", usuarioActual.uid, "registros"), {
     ejercicio,
-    maxpeso,
     peso,
     reps,
     series,
     rpe,
     notas,
     volumen,
+    maxpeso,
     esPR,
     fecha: new Date().toLocaleDateString("es-MX"),
     creado: serverTimestamp()
@@ -115,12 +122,15 @@ function cargarRegistros(uid) {
     snapshot.forEach((documento) => {
       const r = documento.data();
 
+      const maxpesoMostrar = Number(r.maxpeso).toFixed(1);
+
       lista.innerHTML += `
         <div class="exercise">
           <div>
-            <h3>${r.ejercicio} ${r.esPR ? "🏆" : ""}</h3>
+            <h3>${r.ejercicio}</h3>
             <p>${r.series} series · ${r.reps} reps · ${r.peso} kg</p>
-            <p>1RM estimado: ${r.maxpeso} kg</p>
+            <p>1RM estimado: ${maxpesoMostrar} kg</p>
+            <p>${r.esPR ? "🏆 Nuevo PR" : "No es PR"}</p>
             <p>Volumen: ${r.volumen} kg · ${r.fecha}</p>
             ${r.notas ? `<p>Nota: ${r.notas}</p>` : ""}
           </div>
