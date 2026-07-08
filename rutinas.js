@@ -4,7 +4,6 @@ import {
   collection,
   query,
   orderBy,
-  limit,
   onSnapshot,
   addDoc,
   serverTimestamp
@@ -14,12 +13,14 @@ import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
+const selectorRutina = document.getElementById("selectorRutina");
 const nombreRutinaActiva = document.getElementById("nombreRutinaActiva");
 const estadoRutina = document.getElementById("estadoRutina");
 const contenedorRutina = document.getElementById("contenedorRutina");
 const historialRutina = document.getElementById("historialRutina");
 
 let usuarioActual = null;
+let rutinas = [];
 let rutinaActualId = null;
 let rutinaActual = null;
 
@@ -30,41 +31,75 @@ onAuthStateChanged(auth, (user) => {
   }
 
   usuarioActual = user;
-  cargarUltimaRutina();
+  cargarRutinas();
   cargarHistorialRutina();
 });
 
-function cargarUltimaRutina() {
+function cargarRutinas() {
   const consulta = query(
     collection(db, "usuarios", usuarioActual.uid, "rutina"),
-    orderBy("creado", "desc"),
-    limit(1)
+    orderBy("creado", "desc")
   );
 
   onSnapshot(consulta, (snapshot) => {
+    rutinas = [];
+
+    selectorRutina.innerHTML = `<option value="">Selecciona una rutina</option>`;
+
     if (snapshot.empty) {
-      nombreRutinaActiva.textContent = "Sin rutina";
-      estadoRutina.textContent = "---";
+      selectorRutina.innerHTML = `<option value="">No tienes rutinas</option>`;
       contenedorRutina.innerHTML = `
         <h2>Ejercicios</h2>
-        <p class="empty">No tienes rutinas creadas. Ve a Crear para hacer una.</p>
+        <p class="empty">Ve a Crear para hacer tu primera rutina.</p>
       `;
       return;
     }
 
-    const documento = snapshot.docs[0];
+    snapshot.forEach((documento) => {
+      const rutina = documento.data();
 
-    rutinaActualId = documento.id;
-    rutinaActual = documento.data();
+      rutinas.push({
+        id: documento.id,
+        ...rutina
+      });
 
-    nombreRutinaActiva.textContent = rutinaActual.nombre;
-    estadoRutina.textContent = rutinaActual.estado;
-
-    mostrarRutina(rutinaActual);
+      selectorRutina.innerHTML += `
+        <option value="${documento.id}">
+          ${rutina.nombre}
+        </option>
+      `;
+    });
   });
 }
 
+selectorRutina.addEventListener("change", () => {
+  const idSeleccionado = selectorRutina.value;
+
+  if (!idSeleccionado) {
+    rutinaActualId = null;
+    rutinaActual = null;
+
+    nombreRutinaActiva.textContent = "Sin rutina";
+    estadoRutina.textContent = "---";
+
+    contenedorRutina.innerHTML = `
+      <h2>Ejercicios</h2>
+      <p class="empty">Selecciona una rutina para comenzar.</p>
+    `;
+
+    return;
+  }
+
+  rutinaActual = rutinas.find((r) => r.id === idSeleccionado);
+  rutinaActualId = idSeleccionado;
+
+  mostrarRutina(rutinaActual);
+});
+
 function mostrarRutina(rutina) {
+  nombreRutinaActiva.textContent = rutina.nombre;
+  estadoRutina.textContent = rutina.estado || "activa";
+
   contenedorRutina.innerHTML = `<h2>${rutina.nombre}</h2>`;
 
   rutina.ejercicios.forEach((item, index) => {
@@ -98,6 +133,11 @@ function mostrarRutina(rutina) {
 }
 
 async function completarEjercicio(index) {
+  if (!rutinaActual || !rutinaActualId) {
+    alert("Selecciona una rutina primero");
+    return;
+  }
+
   const ejercicio = rutinaActual.ejercicios[index];
 
   const pesoReal = Number(document.getElementById(`pesoReal-${index}`).value);
@@ -128,8 +168,7 @@ async function completarEjercicio(index) {
 function cargarHistorialRutina() {
   const consulta = query(
     collection(db, "usuarios", usuarioActual.uid, "registrosRutina"),
-    orderBy("creado", "desc"),
-    limit(10)
+    orderBy("creado", "desc")
   );
 
   onSnapshot(consulta, (snapshot) => {

@@ -17,24 +17,34 @@
     </div>
     <div class="profile">PL</div>
   </header>
+<section class="card">
+  <h2>Seleccionar rutina</h2>
 
-  <section class="card summary">
-    <div>
-      <p>Rutina seleccionada</p>
-      <h2 id="nombreRutinaActiva">Sin rutina</h2>
-    </div>
-    <span id="estadoRutina">---</span>
-  </section>
+  <label for="selectorRutina">Rutina</label>
+  <select id="selectorRutina">
+    <option value="">Cargando rutinas...</option>
+  </select>
+</section>
 
-  <section class="card" id="contenedorRutina">
-    <h2>Ejercicios</h2>
-    <p class="empty">Cargando rutina...</p>
-  </section>
+<section class="card summary">
+  <div>
+    <p>Rutina seleccionada</p>
+    <h2 id="nombreRutinaActiva">Sin rutina</h2>
+  </div>
+  <span id="estadoRutina">---</span>
+</section>
 
-  <section class="card" id="historialRutina">
-    <h2>Registros de rutina</h2>
-    <p class="empty">Todavía no hay registros.</p>
-  </section>
+<section class="card" id="contenedorRutina">
+  <h2>Ejercicios</h2>
+  <p class="empty">Selecciona una rutina para comenzar.</p>
+</section>
+
+<section class="card" id="historialRutina">
+  <h2>Registros de rutina</h2>
+  <p class="empty">Todavía no hay registros.</p>
+</section>
+
+
 
   <nav class="bottom-nav">
     <a href="index.html">Inicio</a>
@@ -47,7 +57,7 @@
 </main>
 
 <script type="module" src="firebase.js"></script>
-<script type="module" src="rutina.js"></script>
+<script type="module" src="rutinas.js"></script>
 
 </body>
 </html>
