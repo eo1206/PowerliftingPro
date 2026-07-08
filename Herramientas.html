@@ -19,18 +19,6 @@
   </header>
 
   <section class="card">
-    <h2>Discos disponibles</h2>
-
-    <label><input class="disco" type="checkbox" value="25" checked> 25 kg</label>
-    <label><input class="disco" type="checkbox" value="20" checked> 20 kg</label>
-    <label><input class="disco" type="checkbox" value="15" checked> 15 kg</label>
-    <label><input class="disco" type="checkbox" value="10" checked> 10 kg</label>
-    <label><input class="disco" type="checkbox" value="5" checked> 5 kg</label>
-    <label><input class="disco" type="checkbox" value="2.5" checked> 2.5 kg</label>
-    <label><input class="disco" type="checkbox" value="1.25"> 1.25 kg</label>
-  </section>
-
-  <section class="card">
     <h2>Peso a discos</h2>
 
     <input id="pesoObjetivo" type="number" placeholder="Peso total con barra">
@@ -78,13 +66,13 @@
     <h2>Puntos IPF GL</h2>
 
     <label>Sexo</label>
-    <select id="sexoGL">
+    <select id="sexoGL" title="Seleccionar sexo">
       <option value="hombre">Hombre</option>
       <option value="mujer">Mujer</option>
     </select>
 
     <label>Modalidad</label>
-    <select id="modalidadGL">
+    <select id="modalidadGL" title="Seleccionar modalidad">
       <option value="classicPowerlifting">Classic Powerlifting</option>
       <option value="equippedPowerlifting">Equipped Powerlifting</option>
       <option value="classicBench">Classic Bench Press</option>
@@ -100,6 +88,19 @@
 
     <div id="resultadoGL"></div>
   </section>
+  
+  <section class="card">
+    <h2>Discos disponibles</h2>
+
+    <label><input class="disco" type="checkbox" value="25" checked> 25 kg</label>
+    <label><input class="disco" type="checkbox" value="20" checked> 20 kg</label>
+    <label><input class="disco" type="checkbox" value="15" checked> 15 kg</label>
+    <label><input class="disco" type="checkbox" value="10" checked> 10 kg</label>
+    <label><input class="disco" type="checkbox" value="5" checked> 5 kg</label>
+    <label><input class="disco" type="checkbox" value="2.5" checked> 2.5 kg</label>
+    <label><input class="disco" type="checkbox" value="1.25"> 1.25 kg</label>
+  </section>
+
 
   <nav class="bottom-nav">
     <a href="index.html">Inicio</a>

@@ -24,6 +24,17 @@ const volMuerto = document.getElementById("volMuerto");
 
 const ultimosRegistros = document.getElementById("ultimosRegistros");
 
+
+const ejercicioGrafica = document.getElementById("ejercicioGrafica");
+const canvasGrafica = document.getElementById("graficaMaximos");
+const ctx = canvasGrafica.getContext("2d");
+
+let registrosGlobales = [];
+
+ejercicioGrafica.addEventListener("change", () => {
+  dibujarGraficaMaximos(ejercicioGrafica.value);
+});
+
 let usuarioActual = null;
 
 onAuthStateChanged(auth, (user) => {
@@ -61,9 +72,10 @@ function cargarProgreso() {
       ultimosRegistros.innerHTML += `<p class="empty">Todavía no hay registros.</p>`;
       return;
     }
-
+registrosGlobales = [];
     snapshot.forEach((documento) => {
       const r = documento.data();
+registrosGlobales.push(r);
 
       cantidadRegistros++;
 
@@ -101,6 +113,7 @@ function cargarProgreso() {
       }
     });
 
+    dibujarGraficaMaximos(ejercicioGrafica.value);
     prSentadilla.textContent = mejorSentadilla.toFixed(1);
     prBanca.textContent = mejorBanca.toFixed(1);
     prMuerto.textContent = mejorMuerto.toFixed(1);
@@ -125,4 +138,83 @@ function limpiarValores() {
   volSentadilla.textContent = "0 kg";
   volBanca.textContent = "0 kg";
   volMuerto.textContent = "0 kg";
+}
+
+function dibujarGraficaMaximos(ejercicioBuscado) {
+  const datos = registrosGlobales
+    .filter(r => r.ejercicio === ejercicioBuscado && r.maxpeso)
+    .sort((a, b) => {
+      const fechaA = a.creado?.seconds || 0;
+      const fechaB = b.creado?.seconds || 0;
+      return fechaA - fechaB;
+    });
+
+  ctx.clearRect(0, 0, canvasGrafica.width, canvasGrafica.height);
+
+  if (datos.length === 0) {
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "14px Arial";
+    ctx.fillText("No hay datos para este ejercicio", 40, 110);
+    return;
+  }
+
+  const padding = 35;
+  const ancho = canvasGrafica.width - padding * 2;
+  const alto = canvasGrafica.height - padding * 2;
+
+  const valores = datos.map(d => Number(d.maxpeso));
+  const minimo = Math.min(...valores);
+  const maximo = Math.max(...valores);
+
+  const rango = maximo - minimo || 1;
+
+  ctx.strokeStyle = "#94a3b8";
+  ctx.lineWidth = 1;
+
+  ctx.beginPath();
+  ctx.moveTo(padding, padding);
+  ctx.lineTo(padding, canvasGrafica.height - padding);
+  ctx.lineTo(canvasGrafica.width - padding, canvasGrafica.height - padding);
+  ctx.stroke();
+
+  ctx.fillStyle = "#cbd5e1";
+  ctx.font = "12px Arial";
+
+  ctx.fillText(maximo.toFixed(1) + " kg", 5, padding + 5);
+  ctx.fillText(minimo.toFixed(1) + " kg", 5, canvasGrafica.height - padding);
+
+  ctx.beginPath();
+
+  datos.forEach((d, i) => {
+    const x = padding + (i * ancho) / (datos.length - 1 || 1);
+    const y = canvasGrafica.height - padding - ((Number(d.maxpeso) - minimo) / rango) * alto;
+
+    if (i === 0) {
+      ctx.moveTo(x, y);
+    } else {
+      ctx.lineTo(x, y);
+    }
+  });
+
+  ctx.strokeStyle = "#ef4444";
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  datos.forEach((d, i) => {
+    const x = padding + (i * ancho) / (datos.length - 1 || 1);
+    const y = canvasGrafica.height - padding - ((Number(d.maxpeso) - minimo) / rango) * alto;
+
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = "#ef4444";
+    ctx.fill();
+
+    const fecha = d.fecha || "";
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "10px Arial";
+
+    if (i === 0 || i === datos.length - 1) {
+      ctx.fillText(fecha, x - 20, canvasGrafica.height - 10);
+    }
+  });
 }
