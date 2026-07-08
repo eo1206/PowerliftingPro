@@ -33,6 +33,40 @@ onAuthStateChanged(auth, (user) => {
   cargarRegistros(user.uid);
 });
 
+
+async function obtenerMaximoPorEjercicio(ejercicioBuscado) {
+  const consulta = query(
+    collection(db, "usuarios", usuarioActual.uid, "registros"),
+    where("ejercicio", "==", ejercicioBuscado)
+  );
+
+  const resultados = await getDocs(consulta);
+
+  let maximo = 0;
+
+  resultados.forEach((documento) => {
+    const datos = documento.data();
+    const valor = Number(datos.maxpeso);
+
+    if (valor > maximo) {
+      maximo = valor;
+    }
+  });
+
+  return maximo;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 function calcular1RM(peso, reps) {
   const resultado = peso * 36 / (37 - reps);
   return Number(resultado.toFixed(1));
@@ -103,6 +137,11 @@ form.addEventListener("submit", async (e) => {
   form.reset();
 });
 
+const maxSentadilla = await obtenerMaximoPorEjercicio("Sentadilla");
+const maxBanca = await obtenerMaximoPorEjercicio("Press banca");
+const maxMuerto = await obtenerMaximoPorEjercicio("Peso muerto");
+
+
 function cargarRegistros(uid) {
   if (cancelarEscucha) cancelarEscucha();
 
@@ -150,3 +189,5 @@ function cargarRegistros(uid) {
     });
   });
 }
+
+
