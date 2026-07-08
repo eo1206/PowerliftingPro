@@ -1,7 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PowerliftingPro | Herramientas</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-<section id="Herramientas" class="page">
+<main class="app">
+
+  <header class="header">
+    <div>
+      <p class="label">funciones extras</p>
+      <h1>herramientas</h1>
+      </h1>
+    </div>
+    <div class="profile">PL</div>
+  </header>
+
   <section class="card">
-    <h2>Herramientas</h2>
-    <p>Aquí pueden ir herramientas adicionales para el entrenamiento.</p>
+    <h2>Usuario</h2>
+
+    <div class="profile-big">PL</div>
+
+    <p class="profile-info">Nombre: <span id="nombreUsuario">Usuario</span></p>
+    <p class="profile-info">Nivel: Intermedio</p>
+    <p class="profile-info">Objetivo: Powerlifting</p>
+
+    <button id="cerrarSesion" type="button" class="logout full">Cerrar sesión</button>
   </section>
-</section>
+
+  <section class="card">
+    <h2>Datos personales</h2>
+
+    <input type="number" placeholder="Peso corporal">
+    <input type="number" placeholder="Edad">
+    <input type="number" placeholder="Altura cm">
+
+    <button type="button">Guardar cambios</button>
+  </section>
+
+  <nav class="bottom-nav">
+    <a href="inicio.html">Inicio</a>
+    <a href="rutina.html">Rutina</a>
+    <a href="crear.html">Crear</a>
+    <a href="progreso.html">Progreso</a>
+    <a href="herramientas.html" class="active">Herramientas</a>
+  </nav>
+
+</main>
+
+<script type="module" src="firebase.js"></script>
+<script type="module" src="perfil.js"></script>
+
+</body>
+</html>

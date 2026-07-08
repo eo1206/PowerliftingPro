@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PowerliftingPro | Crear</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main class="app">
+
+  <header class="header">
+    <div>
+      <p class="label">Constructor de rutinas</p>
+      <h1>Crear</h1>
+    </div>
+    <div class="profile">PL</div>
+  </header>
+
+  <section class="card">
+    <h2>Rutina automática</h2>
+
+    <label>Objetivo</label>
+    <select id="objetivoRutina">
+      <option value="powerlifting">Powerlifting</option>
+      <option value="fuerza">Fuerza</option>
+      <option value="hipertrofia">Hipertrofia</option>
+      <option value="tecnica">Técnica</option>
+      <option value="peaking">Peaking</option>
+    </select>
+
+    <label>Nivel</label>
+    <select id="nivelRutina">
+      <option value="principiante">Principiante</option>
+      <option value="intermedio">Intermedio</option>
+      <option value="avanzado">Avanzado</option>
+    </select>
+
+    <div class="grid">
+      <input id="diasRutina" type="number" placeholder="Días por semana">
+      <input id="semanasRutina" type="number" placeholder="Semanas">
+    </div>
+
+    <div class="grid">
+      <input id="rmSentadilla" type="number" placeholder="1RM Sentadilla">
+      <input id="rmBanca" type="number" placeholder="1RM Banca">
+    </div>
+
+    <input id="rmMuerto" type="number" placeholder="1RM Peso muerto">
+
+    <button id="generarRutinaAuto" type="button">Generar rutina</button>
+  </section>
+
+  <section class="card">
+    <h2>Rutina manual</h2>
+
+    <input id="nombreRutinaManual" type="text" placeholder="Nombre de la rutina">
+
+    <select id="ejercicioManual">
+      <option>Sentadilla</option>
+      <option>Press banca</option>
+      <option>Peso muerto</option>
+      <option>Accesorio</option>
+    </select>
+
+    <div class="grid">
+      <input id="seriesManual" type="number" placeholder="Series">
+      <input id="repsManual" type="number" placeholder="Reps">
+    </div>
+
+    <div class="grid">
+      <input id="pesoManual" type="number" placeholder="Peso o %">
+      <input id="rpeManual" type="number" placeholder="RPE">
+    </div>
+
+    <textarea id="notaManual" placeholder="Notas"></textarea>
+
+    <button id="agregarEjercicioManual" type="button">Agregar ejercicio</button>
+    <button id="guardarRutinaManual" type="button">Guardar rutina</button>
+  </section>
+
+  <section class="card" id="vistaRutinaCreada">
+    <h2>Vista previa</h2>
+    <p class="empty">Aquí aparecerá la rutina generada.</p>
+  </section>
+
+  <nav class="bottom-nav">
+    <a href="inicio.html">Inicio</a>
+    <a href="rutina.html">Rutina</a>
+    <a href="crear.html" class="active">Crear</a>
+    <a href="progreso.html">Progreso</a>
+    <a href="herramientas.html">Herramientas</a>
+  </nav>
+
+</main>
+
+<script type="module" src="firebase.js"></script>
+<script type="module" src="crear.js"></script>
+
+</body>
+</html>
