@@ -21,47 +21,66 @@
   <section class="stats">
     <div class="stat">
       <p>PR Sentadilla</p>
-      <h3>120 kg</h3>
+      <h3><span id="prSentadilla">0</span> kg</h3>
     </div>
+
     <div class="stat">
       <p>PR Banca</p>
-      <h3>85 kg</h3>
+      <h3><span id="prBanca">0</span> kg</h3>
     </div>
+
     <div class="stat">
       <p>PR Muerto</p>
-      <h3>150 kg</h3>
+      <h3><span id="prMuerto">0</span> kg</h3>
     </div>
   </section>
 
   <section class="card">
-    <h2>Volumen semanal</h2>
-    <div class="fake-chart">
-      <div style="height:40%"></div>
-      <div style="height:70%"></div>
-      <div style="height:55%"></div>
-      <div style="height:90%"></div>
-      <div style="height:65%"></div>
-    </div>
-  </section>
-
-  <section class="card">
-    <h2>Resumen</h2>
+    <h2>Resumen general</h2>
 
     <div class="exercise">
       <div>
-        <h3>Entrenamientos</h3>
-        <p>12 sesiones este mes</p>
+        <h3>Entrenamientos registrados</h3>
+        <p id="totalEntrenamientos">0 sesiones</p>
       </div>
-      <span>+3</span>
     </div>
 
     <div class="exercise">
       <div>
         <h3>Volumen total</h3>
-        <p>42,500 kg levantados</p>
+        <p id="volumenTotal">0 kg</p>
       </div>
-      <span>Mes</span>
     </div>
+  </section>
+
+  <section class="card">
+    <h2>Volumen por ejercicio</h2>
+
+    <div class="exercise">
+      <div>
+        <h3>Sentadilla</h3>
+        <p id="volSentadilla">0 kg</p>
+      </div>
+    </div>
+
+    <div class="exercise">
+      <div>
+        <h3>Press banca</h3>
+        <p id="volBanca">0 kg</p>
+      </div>
+    </div>
+
+    <div class="exercise">
+      <div>
+        <h3>Peso muerto</h3>
+        <p id="volMuerto">0 kg</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" id="ultimosRegistros">
+    <h2>Últimos registros</h2>
+    <p class="empty">Cargando...</p>
   </section>
 
   <nav class="bottom-nav">
@@ -73,6 +92,9 @@
   </nav>
 
 </main>
+
+<script type="module" src="firebase.js"></script>
+<script type="module" src="progreso.js"></script>
 
 </body>
 </html>
