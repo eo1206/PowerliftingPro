@@ -25,9 +25,9 @@ let cancelarEscucha = null;
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
-    window.location.href = "index.html";
-    return;
-  }
+  usuarioActual = null;
+  return;
+}
 
   usuarioActual = user;
   cargarRegistros(user.uid);
