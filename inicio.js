@@ -138,8 +138,11 @@ form.addEventListener("submit", async (e) => {
 });
 
 const maxSentadilla = await obtenerMaximoPorEjercicio("Sentadilla");
+document.getElementById("prSentadilla").textContent = maxSentadilla.toFixed(1);
 const maxBanca = await obtenerMaximoPorEjercicio("Press banca");
+document.getElementById("prBanca").textContent = maxBanca.toFixed(1);
 const maxMuerto = await obtenerMaximoPorEjercicio("Peso muerto");
+document.getElementById("prMuerto").textContent = maxMuerto.toFixed(1);
 
 
 function cargarRegistros(uid) {
