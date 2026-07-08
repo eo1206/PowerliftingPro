@@ -12,33 +12,93 @@
 
   <header class="header">
     <div>
-      <p class="label">funciones extras</p>
-      <h1>herramientas</h1>
-      </h1>
+      <p class="label">Calculadoras</p>
+      <h1>Herramientas</h1>
     </div>
     <div class="profile">PL</div>
   </header>
 
   <section class="card">
-    <h2>Usuario</h2>
+    <h2>Discos disponibles</h2>
 
-    <div class="profile-big">PL</div>
-
-    <p class="profile-info">Nombre: <span id="nombreUsuario">Usuario</span></p>
-    <p class="profile-info">Nivel: Intermedio</p>
-    <p class="profile-info">Objetivo: Powerlifting</p>
-
-    <button id="cerrarSesion" type="button" class="logout full">Cerrar sesión</button>
+    <label><input class="disco" type="checkbox" value="25" checked> 25 kg</label>
+    <label><input class="disco" type="checkbox" value="20" checked> 20 kg</label>
+    <label><input class="disco" type="checkbox" value="15" checked> 15 kg</label>
+    <label><input class="disco" type="checkbox" value="10" checked> 10 kg</label>
+    <label><input class="disco" type="checkbox" value="5" checked> 5 kg</label>
+    <label><input class="disco" type="checkbox" value="2.5" checked> 2.5 kg</label>
+    <label><input class="disco" type="checkbox" value="1.25"> 1.25 kg</label>
   </section>
 
   <section class="card">
-    <h2>Datos personales</h2>
+    <h2>Peso a discos</h2>
 
-    <input type="number" placeholder="Peso corporal">
-    <input type="number" placeholder="Edad">
-    <input type="number" placeholder="Altura cm">
+    <input id="pesoObjetivo" type="number" placeholder="Peso total con barra">
+    <input id="pesoBarra" type="number" value="20" placeholder="Peso de la barra">
 
-    <button type="button">Guardar cambios</button>
+    <button id="calcularDiscos" type="button">Calcular discos</button>
+
+    <div id="resultadoDiscos"></div>
+  </section>
+
+  <section class="card">
+    <h2>Discos a peso</h2>
+
+    <p class="label">Cantidad por lado</p>
+
+    <div class="grid">
+      <input id="d25" type="number" placeholder="25 kg">
+      <input id="d20" type="number" placeholder="20 kg">
+      <input id="d15" type="number" placeholder="15 kg">
+      <input id="d10" type="number" placeholder="10 kg">
+      <input id="d5" type="number" placeholder="5 kg">
+      <input id="d25chico" type="number" placeholder="2.5 kg">
+      <input id="d125" type="number" placeholder="1.25 kg">
+    </div>
+
+    <button id="calcularPeso" type="button">Calcular peso total</button>
+
+    <div id="resultadoPeso"></div>
+  </section>
+
+  <section class="card">
+    <h2>Calculadora 1RM</h2>
+
+    <div class="grid">
+      <input id="peso1rm" type="number" placeholder="Peso kg">
+      <input id="reps1rm" type="number" placeholder="Reps">
+    </div>
+
+    <button id="calcular1RM" type="button">Calcular 1RM</button>
+
+    <div id="resultado1RM"></div>
+  </section>
+
+  <section class="card">
+    <h2>Puntos IPF GL</h2>
+
+    <label>Sexo</label>
+    <select id="sexoGL">
+      <option value="hombre">Hombre</option>
+      <option value="mujer">Mujer</option>
+    </select>
+
+    <label>Modalidad</label>
+    <select id="modalidadGL">
+      <option value="classicPowerlifting">Classic Powerlifting</option>
+      <option value="equippedPowerlifting">Equipped Powerlifting</option>
+      <option value="classicBench">Classic Bench Press</option>
+      <option value="equippedBench">Equipped Bench Press</option>
+    </select>
+
+    <div class="grid">
+      <input id="pesoCorporalGL" type="number" placeholder="Peso corporal kg">
+      <input id="totalGL" type="number" placeholder="Total kg">
+    </div>
+
+    <button id="calcularGL" type="button">Calcular puntos</button>
+
+    <div id="resultadoGL"></div>
   </section>
 
   <nav class="bottom-nav">
@@ -51,8 +111,7 @@
 
 </main>
 
-<script type="module" src="firebase.js"></script>
-<script type="module" src="perfil.js"></script>
+<script type="module" src="herramientas.js"></script>
 
 </body>
 </html>
