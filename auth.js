@@ -16,10 +16,28 @@ import {
 const authScreen = document.getElementById("authScreen");
 const appScreen = document.getElementById("appScreen");
 
+const loginTab = document.getElementById("loginTab");
+const registerTab = document.getElementById("registerTab");
+
+const loginBox = document.getElementById("loginBox");
+const registerBox = document.getElementById("registerBox");
+
 const crearCuenta = document.getElementById("crearCuenta");
 const iniciarSesion = document.getElementById("iniciarSesion");
 const cerrarSesion = document.getElementById("cerrarSesion");
 
+// Cambiar pestañas
+loginTab.addEventListener("click", () => {
+  loginBox.classList.remove("hidden");
+  registerBox.classList.add("hidden");
+});
+
+registerTab.addEventListener("click", () => {
+  registerBox.classList.remove("hidden");
+  loginBox.classList.add("hidden");
+});
+
+// Crear cuenta
 crearCuenta.addEventListener("click", async () => {
   const nombre = document.getElementById("regNombre").value.trim();
   const password = document.getElementById("regPassword").value;
@@ -35,24 +53,32 @@ crearCuenta.addEventListener("click", async () => {
     return;
   }
 
-  const email = nombre.toLowerCase() + "@powerlog.app";
+  if (password.length < 6) {
+    alert("La contraseña debe tener mínimo 6 caracteres");
+    return;
+  }
+
+  const usuarioLimpio = nombre.toLowerCase().replace(/\s+/g, "");
+  const email = usuarioLimpio + "@powerlog.app";
 
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
     await setDoc(doc(db, "usuarios", userCredential.user.uid), {
       nombre: nombre,
+      usuario: usuarioLimpio,
       email: email,
       creado: new Date()
     });
 
-    alert("Cuenta creada");
+    alert("Cuenta creada correctamente");
   } catch (error) {
-    alert(error.message);
+    alert(error.code);
     console.error(error);
   }
 });
 
+// Iniciar sesión
 iniciarSesion.addEventListener("click", async () => {
   const nombre = document.getElementById("loginNombre").value.trim();
   const password = document.getElementById("loginPassword").value;
@@ -62,20 +88,23 @@ iniciarSesion.addEventListener("click", async () => {
     return;
   }
 
-  const email = nombre.toLowerCase() + "@powerlog.app";
+  const usuarioLimpio = nombre.toLowerCase().replace(/\s+/g, "");
+  const email = usuarioLimpio + "@powerlog.app";
 
   try {
     await signInWithEmailAndPassword(auth, email, password);
   } catch (error) {
-    alert("No se pudo iniciar sesión");
+    alert(error.code);
     console.error(error);
   }
 });
 
+// Cerrar sesión
 cerrarSesion.addEventListener("click", async () => {
   await signOut(auth);
 });
 
+// Detectar sesión
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     authScreen.classList.add("hidden");
