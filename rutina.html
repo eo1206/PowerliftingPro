@@ -25,66 +25,33 @@
     </div>
     <span>3 días</span>
   </section>
+<section class="card">
+  <h2>Crear rutina</h2>
 
-  <section class="card">
-    <h2>Lunes</h2>
+  <input id="nombreRutina" type="text" placeholder="Nombre de la rutina">
 
-    <div class="exercise">
-      <div>
-        <h3>Sentadilla</h3>
-        <p>5 series · 3 reps · 85%</p>
-      </div>
-      <span>Pendiente</span>
-    </div>
+  <label>Ejercicio</label>
+  <select id="ejercicioRutina">
+    <option>Sentadilla</option>
+    <option>Press banca</option>
+    <option>Peso muerto</option>
+    <option>Press militar</option>
+    <option>Remo</option>
+  </select>
 
-    <div class="exercise">
-      <div>
-        <h3>Press banca</h3>
-        <p>5 series · 3 reps · 80%</p>
-      </div>
-      <span>Pendiente</span>
-    </div>
-  </section>
+  <div class="grid">
+    <input id="pesoRutina" type="number" placeholder="Peso kg">
+    <input id="repsRutina" type="number" placeholder="Reps">
+  </div>
 
-  <section class="card">
-    <h2>Miércoles</h2>
+  <button id="agregarEjercicioRutina" type="button">Agregar ejercicio</button>
+  <button id="guardarRutina" type="button">Crear rutina</button>
+</section>
 
-    <div class="exercise">
-      <div>
-        <h3>Peso muerto</h3>
-        <p>4 series · 3 reps · 82%</p>
-      </div>
-      <span>Pendiente</span>
-    </div>
-
-    <div class="exercise">
-      <div>
-        <h3>Remo</h3>
-        <p>4 series · 10 reps</p>
-      </div>
-      <span>Pendiente</span>
-    </div>
-  </section>
-
-  <section class="card">
-    <h2>Viernes</h2>
-
-    <div class="exercise">
-      <div>
-        <h3>Sentadilla pausa</h3>
-        <p>4 series · 4 reps · 70%</p>
-      </div>
-      <span>Pendiente</span>
-    </div>
-
-    <div class="exercise">
-      <div>
-        <h3>Banca volumen</h3>
-        <p>4 series · 6 reps · 72%</p>
-      </div>
-      <span>Pendiente</span>
-    </div>
-  </section>
+<section class="card" id="vistaRutina">
+  <h2>Rutina</h2>
+  <p class="empty">Todavía no hay rutina.</p>
+</section>
 
   <nav class="bottom-nav">
     <a href="index.html">Inicio</a>
@@ -95,6 +62,7 @@
   </nav>
 
 </main>
-
+<script type="module" src="firebase.js"></script>
+<script type="module" src="rutina.js"></script>
 </body>
 </html>

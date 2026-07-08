@@ -135,7 +135,7 @@ function cargarRegistros(uid) {
             <h3>${r.ejercicio}</h3>
             <p>${r.series} series · ${r.reps} reps · ${r.peso} kg</p>
             <p>1RM estimado: ${maxpesoMostrar} kg</p>
-            <p>${r.esPR ? "🏆 Nuevo PR" : "No es PR"}</p>
+            <p>${r.esPR ? "Nuevo PR" : "No es PR"}</p>
             <p>Volumen: ${r.volumen} kg · ${r.fecha}</p>
             ${r.notas ? `<p>Nota: ${r.notas}</p>` : ""}
           </div>
