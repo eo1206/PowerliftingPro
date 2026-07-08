@@ -23,6 +23,7 @@ let usuarioActual = null;
 let rutinas = [];
 let rutinaActualId = null;
 let rutinaActual = null;
+let ejerciciosCompletados = [];
 
 onAuthStateChanged(auth, (user) => {
   if (!user) {
@@ -43,7 +44,6 @@ function cargarRutinas() {
 
   onSnapshot(consulta, (snapshot) => {
     rutinas = [];
-
     selectorRutina.innerHTML = `<option value="">Selecciona una rutina</option>`;
 
     if (snapshot.empty) {
@@ -78,6 +78,7 @@ selectorRutina.addEventListener("change", () => {
   if (!idSeleccionado) {
     rutinaActualId = null;
     rutinaActual = null;
+    ejerciciosCompletados = [];
 
     nombreRutinaActiva.textContent = "Sin rutina";
     estadoRutina.textContent = "---";
@@ -92,6 +93,7 @@ selectorRutina.addEventListener("change", () => {
 
   rutinaActual = rutinas.find((r) => r.id === idSeleccionado);
   rutinaActualId = idSeleccionado;
+  ejerciciosCompletados = [];
 
   mostrarRutina(rutinaActual);
 });
@@ -104,9 +106,13 @@ function mostrarRutina(rutina) {
 
   rutina.ejercicios.forEach((item, index) => {
     contenedorRutina.innerHTML += `
-      <div class="exercise rutina-item">
+      <div class="exercise rutina-item" id="ejercicio-card-${index}">
         <div>
-          <h3>${item.ejercicio}</h3>
+          <h3>
+            <span id="check-${index}"></span>
+            ${item.ejercicio}
+          </h3>
+
           <p>${item.series} series · ${item.repsObjetivo} reps objetivo</p>
 
           <div class="grid">
@@ -124,15 +130,23 @@ function mostrarRutina(rutina) {
     `;
   });
 
+  contenedorRutina.innerHTML += `
+    <button id="guardarSesionRutina" type="button">
+      Guardar datos
+    </button>
+  `;
+
   document.querySelectorAll(".complete-routine").forEach((boton) => {
-    boton.addEventListener("click", async () => {
+    boton.addEventListener("click", () => {
       const index = Number(boton.dataset.index);
-      await completarEjercicio(index);
+      completarEjercicio(index);
     });
   });
+
+  document.getElementById("guardarSesionRutina").addEventListener("click", guardarSesionRutina);
 }
 
-async function completarEjercicio(index) {
+function completarEjercicio(index) {
   if (!rutinaActual || !rutinaActualId) {
     alert("Selecciona una rutina primero");
     return;
@@ -149,20 +163,55 @@ async function completarEjercicio(index) {
     return;
   }
 
-  await addDoc(collection(db, "usuarios", usuarioActual.uid, "registrosRutina"), {
-    rutinaId: rutinaActualId,
-    nombreRutina: rutinaActual.nombre,
+  const registro = {
     ejercicio: ejercicio.ejercicio,
     seriesObjetivo: ejercicio.series,
     repsObjetivo: ejercicio.repsObjetivo,
     pesoReal,
     repsReal,
-    rpeReal,
-    fecha: new Date().toLocaleDateString("es-MX"),
-    creado: serverTimestamp()
-  });
+    rpeReal
+  };
 
-  alert("Ejercicio registrado");
+  ejerciciosCompletados[index] = registro;
+
+  document.getElementById(`check-${index}`).textContent = "✅";
+  document.getElementById(`ejercicio-card-${index}`).classList.add("completed");
+
+  alert("Ejercicio marcado como completado");
+}
+
+async function guardarSesionRutina() {
+  if (!rutinaActual || !rutinaActualId) {
+    alert("Selecciona una rutina primero");
+    return;
+  }
+
+  const ejerciciosFiltrados = ejerciciosCompletados.filter(Boolean);
+
+  if (ejerciciosFiltrados.length === 0) {
+    alert("Completa mínimo un ejercicio antes de guardar");
+    return;
+  }
+
+  try {
+    await addDoc(collection(db, "usuarios", usuarioActual.uid, "registrosRutina"), {
+      rutinaId: rutinaActualId,
+      nombreRutina: rutinaActual.nombre,
+      ejercicios: ejerciciosFiltrados,
+      totalEjercicios: rutinaActual.ejercicios.length,
+      ejerciciosCompletados: ejerciciosFiltrados.length,
+      fecha: new Date().toLocaleDateString("es-MX"),
+      creado: serverTimestamp()
+    });
+
+    alert("Datos guardados correctamente");
+
+    ejerciciosCompletados = [];
+    mostrarRutina(rutinaActual);
+  } catch (error) {
+    alert("No se pudieron guardar los datos");
+    console.error(error);
+  }
 }
 
 function cargarHistorialRutina() {
@@ -185,9 +234,8 @@ function cargarHistorialRutina() {
       historialRutina.innerHTML += `
         <div class="exercise">
           <div>
-            <h3>${r.ejercicio}</h3>
-            <p>${r.pesoReal} kg · ${r.repsReal} reps · RPE ${r.rpeReal || "-"}</p>
-            <p>Rutina: ${r.nombreRutina}</p>
+            <h3>${r.nombreRutina}</h3>
+            <p>${r.ejerciciosCompletados}/${r.totalEjercicios} ejercicios completados</p>
             <p>${r.fecha}</p>
           </div>
         </div>
