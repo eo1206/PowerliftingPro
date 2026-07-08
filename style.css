@@ -376,3 +376,72 @@ button {
   padding: 10px;
   margin-top: 14px;
 }
+
+.routine-exercise {
+  background: #334155;
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 14px;
+  display: block;
+}
+
+.routine-top h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.routine-top p {
+  color: #cbd5e1;
+  font-size: 13px;
+}
+
+.routine-number {
+  background: #ef4444;
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: inline-grid;
+  place-items: center;
+  font-size: 13px;
+}
+
+.check {
+  margin-left: auto;
+  color: #22c55e;
+  font-size: 22px;
+}
+
+.routine-inputs {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.routine-inputs label {
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+.routine-inputs input {
+  margin-top: 5px;
+}
+
+.complete-routine {
+  width: 100%;
+  margin-top: 14px;
+}
+
+.routine-exercise.completed {
+  border: 2px solid #22c55e;
+  background: #1f3b2d;
+}
+
+@media (min-width: 430px) {
+  .routine-inputs {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

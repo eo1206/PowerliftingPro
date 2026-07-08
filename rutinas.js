@@ -102,32 +102,44 @@ function mostrarRutina(rutina) {
   nombreRutinaActiva.textContent = rutina.nombre;
   estadoRutina.textContent = rutina.estado || "activa";
 
-  contenedorRutina.innerHTML = `<h2>${rutina.nombre}</h2>`;
-
   rutina.ejercicios.forEach((item, index) => {
     contenedorRutina.innerHTML += `
-      <div class="exercise rutina-item" id="ejercicio-card-${index}">
-        <div>
-          <h3>
-            <span id="check-${index}"></span>
-            ${item.ejercicio}
-          </h3>
-
-          <p>${item.series} series · ${item.repsObjetivo} reps objetivo</p>
-
-          <div class="grid">
-            <input id="pesoReal-${index}" type="number" placeholder="Peso realizado">
-            <input id="repsReal-${index}" type="number" placeholder="Reps reales">
-          </div>
-
-          <input id="rpeReal-${index}" type="number" placeholder="RPE">
-        </div>
-
-        <button class="complete-routine" data-index="${index}" type="button">
-          Completar
-        </button>
+  <div class="routine-exercise" id="ejercicio-card-${index}">
+    
+    <div class="routine-top">
+      <div>
+        <h3>
+          <span class="routine-number">${index + 1}</span>
+          ${item.ejercicio}
+          <span id="check-${index}" class="check"></span>
+        </h3>
+        <p>${item.series} series · ${item.repsObjetivo} reps objetivo</p>
       </div>
-    `;
+    </div>
+
+    <div class="routine-inputs">
+      <div>
+        <label>Peso realizado</label>
+        <input id="pesoReal-${index}" type="number" placeholder="kg">
+      </div>
+
+      <div>
+        <label>Reps reales</label>
+        <input id="repsReal-${index}" type="number" placeholder="reps">
+      </div>
+
+      <div>
+        <label>RPE</label>
+        <input id="rpeReal-${index}" type="number" placeholder="RPE">
+      </div>
+    </div>
+
+    <button class="complete-routine" data-index="${index}" type="button">
+      Completar
+    </button>
+
+  </div>
+`;
   });
 
   contenedorRutina.innerHTML += `
