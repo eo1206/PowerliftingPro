@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PowerLog</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <main class="app">
+
+    <header class="header">
+      <div>
+        <p class="label">Registro de entrenamiento</p>
+        <h1>PowerLog</h1>
+      </div>
+      <div class="profile">PL</div>
+    </header>
+
+    <section class="card summary">
+      <div>
+        <p>Rutina actual</p>
+        <h2>Powerlifting</h2>
+      </div>
+      <span>Día 1</span>
+    </section>
+
+    <section class="stats">
+      <div class="stat">
+        <p>Sentadilla</p>
+        <h3>120 kg</h3>
+      </div>
+      <div class="stat">
+        <p>Banca</p>
+        <h3>85 kg</h3>
+      </div>
+      <div class="stat">
+        <p>Peso muerto</p>
+        <h3>150 kg</h3>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Registrar ejercicio</h2>
+
+      <form>
+        <label>Ejercicio</label>
+        <select>
+          <option>Sentadilla</option>
+          <option>Press banca</option>
+          <option>Peso muerto</option>
+          <option>Accesorio</option>
+        </select>
+
+        <div class="grid">
+          <div>
+            <label>Peso</label>
+            <input type="number" placeholder="kg">
+          </div>
+
+          <div>
+            <label>Reps</label>
+            <input type="number" placeholder="5">
+          </div>
+        </div>
+
+        <div class="grid">
+          <div>
+            <label>Series</label>
+            <input type="number" placeholder="3">
+          </div>
+
+          <div>
+            <label>RPE</label>
+            <input type="number" placeholder="8">
+          </div>
+        </div>
+
+        <label>Notas</label>
+        <textarea placeholder="Ej: buena técnica, pesado, dolor, etc."></textarea>
+
+        <button type="submit">Guardar registro</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Últimos registros</h2>
+
+      <div class="exercise">
+        <div>
+          <h3>Sentadilla</h3>
+          <p>3 series · 5 reps · 120 kg</p>
+        </div>
+        <span>RPE 8</span>
+      </div>
+
+      <div class="exercise">
+        <div>
+          <h3>Press banca</h3>
+          <p>4 series · 4 reps · 85 kg</p>
+        </div>
+        <span>RPE 7</span>
+      </div>
+
+      <div class="exercise">
+        <div>
+          <h3>Peso muerto</h3>
+          <p>2 series · 3 reps · 150 kg</p>
+        </div>
+        <span>RPE 9</span>
+      </div>
+    </section>
+
+    <nav class="bottom-nav">
+      <a href="#" class="active">Inicio</a>
+      <a href="#">Rutina</a>
+      <a href="#">Progreso</a>
+      <a href="#">Perfil</a>
+    </nav>
+
+  </main>
+
+</body>
+</html>
