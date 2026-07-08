@@ -46,10 +46,14 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
+
+  let maxpeso = peso;
+
   const volumen = peso * reps * series;
 
   await addDoc(collection(db, "usuarios", usuarioActual.uid, "registros"), {
     ejercicio,
+    maxpeso,
     peso,
     reps,
     series,
@@ -87,6 +91,7 @@ function cargarRegistros(uid) {
           <div>
             <h3>${r.ejercicio}</h3>
             <p>${r.series} series · ${r.reps} reps · ${r.peso} kg</p>
+            <p>Max peso: ${r.maxpeso} kg</p>
             <p>Volumen: ${r.volumen} kg · ${r.fecha}</p>
             ${r.notas ? `<p>Nota: ${r.notas}</p>` : ""}
           </div>
