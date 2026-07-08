@@ -130,25 +130,6 @@ async function borrarRegistro(uid, id) {
 }
 
 
-const navLinks = document.querySelectorAll(".bottom-nav a");
-const pages = document.querySelectorAll(".page");
-
-navLinks.forEach((link) => {
-  link.addEventListener("click", (e) => {
-    e.preventDefault();
-
-    navLinks.forEach((a) => a.classList.remove("active"));
-    link.classList.add("active");
-
-    const pageId = link.dataset.page;
-
-    pages.forEach((page) => {
-      page.classList.remove("active-page");
-    });
-
-    document.getElementById(pageId).classList.add("active-page");
-  });
-});
 
 const rutinaAuto = document.getElementById("rutinaAuto");
 const rutinaResultado = document.getElementById("rutinaResultado");
