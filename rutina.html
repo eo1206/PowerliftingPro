@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PowerliftingPro | Rutina</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main class="app">
+
+  <header class="header">
+    <div>
+      <p class="label">Plan activo</p>
+      <h1>Mi rutina</h1>
+    </div>
+    <div class="profile">PL</div>
+  </header>
+
+  <section class="card summary">
+    <div>
+      <p>Rutina seleccionada</p>
+      <h2 id="nombreRutinaActiva">Sin rutina</h2>
+    </div>
+    <span id="estadoRutina">---</span>
+  </section>
+
+  <section class="card" id="contenedorRutina">
+    <h2>Ejercicios</h2>
+    <p class="empty">Cargando rutina...</p>
+  </section>
+
+  <section class="card" id="historialRutina">
+    <h2>Registros de rutina</h2>
+    <p class="empty">Todavía no hay registros.</p>
+  </section>
+
+  <nav class="bottom-nav">
+    <a href="index.html">Inicio</a>
+    <a href="rutina.html" class="active">Rutina</a>
+    <a href="crear.html">Crear</a>
+    <a href="progreso.html">Progreso</a>
+    <a href="Herramientas.html">Herramientas</a>
+  </nav>
+
+</main>
+
+<script type="module" src="firebase.js"></script>
+<script type="module" src="rutina.js"></script>
+
+</body>
+</html>
