@@ -218,3 +218,78 @@ button {
     font-size: 28px;
   }
 }
+
+.empty {
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.delete {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 50%;
+  background: #991b1b;
+  font-size: 22px;
+  line-height: 1;
+}
+.hidden {
+  display: none !important;
+}
+
+.auth-screen {
+  min-height: 100vh;
+  background: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: white;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  background: #1e293b;
+  border-radius: 24px;
+  padding: 24px;
+}
+
+.auth-card h1 {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.auth-card p {
+  color: #94a3b8;
+  margin-bottom: 20px;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.tabs button {
+  background: #334155;
+}
+
+.auth-card input {
+  margin-bottom: 12px;
+}
+
+.logout {
+  background: #334155;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 14px;
+}
