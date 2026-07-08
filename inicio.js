@@ -23,7 +23,7 @@ const lista = document.getElementById("listaRegistros");
 let usuarioActual = null;
 let cancelarEscucha = null;
 
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
   if (!user) {
     window.location.href = "index.html";
     return;
@@ -31,41 +31,8 @@ onAuthStateChanged(auth, (user) => {
 
   usuarioActual = user;
   cargarRegistros(user.uid);
+  await actualizarPRs();
 });
-
-
-async function obtenerMaximoPorEjercicio(ejercicioBuscado) {
-  const consulta = query(
-    collection(db, "usuarios", usuarioActual.uid, "registros"),
-    where("ejercicio", "==", ejercicioBuscado)
-  );
-
-  const resultados = await getDocs(consulta);
-
-  let maximo = 0;
-
-  resultados.forEach((documento) => {
-    const datos = documento.data();
-    const valor = Number(datos.maxpeso);
-
-    if (valor > maximo) {
-      maximo = valor;
-    }
-  });
-
-  return maximo;
-}
-
-
-
-
-
-
-
-
-
-
-
 
 function calcular1RM(peso, reps) {
   const resultado = peso * 36 / (37 - reps);
@@ -94,6 +61,16 @@ async function obtenerMaximoPorEjercicio(ejercicioBuscado) {
   return maximo;
 }
 
+async function actualizarPRs() {
+  const maxSentadilla = await obtenerMaximoPorEjercicio("Sentadilla");
+  const maxBanca = await obtenerMaximoPorEjercicio("Press banca");
+  const maxMuerto = await obtenerMaximoPorEjercicio("Peso muerto");
+
+  document.getElementById("prSentadilla").textContent = maxSentadilla.toFixed(1);
+  document.getElementById("prBanca").textContent = maxBanca.toFixed(1);
+  document.getElementById("prMuerto").textContent = maxMuerto.toFixed(1);
+}
+
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -111,14 +88,8 @@ form.addEventListener("submit", async (e) => {
 
   const maxpeso = calcular1RM(peso, reps);
   const volumen = peso * reps * series;
-
   const maximoAnterior = await obtenerMaximoPorEjercicio(ejercicio);
-
-  let esPR = false;
-
-  if (maxpeso > maximoAnterior) {
-    esPR = true;
-  }
+  const esPR = maxpeso > maximoAnterior;
 
   await addDoc(collection(db, "usuarios", usuarioActual.uid, "registros"), {
     ejercicio,
@@ -135,15 +106,8 @@ form.addEventListener("submit", async (e) => {
   });
 
   form.reset();
+  await actualizarPRs();
 });
-
-const maxSentadilla = await obtenerMaximoPorEjercicio("Sentadilla");
-document.getElementById("prSentadilla").textContent = maxSentadilla.toFixed(1);
-const maxBanca = await obtenerMaximoPorEjercicio("Press banca");
-document.getElementById("prBanca").textContent = maxBanca.toFixed(1);
-const maxMuerto = await obtenerMaximoPorEjercicio("Peso muerto");
-document.getElementById("prMuerto").textContent = maxMuerto.toFixed(1);
-
 
 function cargarRegistros(uid) {
   if (cancelarEscucha) cancelarEscucha();
@@ -163,8 +127,7 @@ function cargarRegistros(uid) {
 
     snapshot.forEach((documento) => {
       const r = documento.data();
-
-      const maxpesoMostrar = Number(r.maxpeso).toFixed(1);
+      const maxpesoMostrar = Number(r.maxpeso || 0).toFixed(1);
 
       lista.innerHTML += `
         <div class="exercise">
@@ -188,9 +151,8 @@ function cargarRegistros(uid) {
     document.querySelectorAll(".delete").forEach((boton) => {
       boton.addEventListener("click", async () => {
         await deleteDoc(doc(db, "usuarios", uid, "registros", boton.dataset.id));
+        await actualizarPRs();
       });
     });
   });
 }
-
-
