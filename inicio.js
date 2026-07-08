@@ -4,6 +4,8 @@ import {
   collection,
   addDoc,
   query,
+  where,
+  getDocs,
   orderBy,
   onSnapshot,
   deleteDoc,
@@ -31,6 +33,31 @@ onAuthStateChanged(auth, (user) => {
   cargarRegistros(user.uid);
 });
 
+function calcular1RM(peso, reps) {
+  return peso * 36 / (37 - reps);
+}
+
+async function obtenerPR(ejercicioBuscado) {
+  const consulta = query(
+    collection(db, "usuarios", usuarioActual.uid, "registros"),
+    where("ejercicio", "==", ejercicioBuscado)
+  );
+
+  const resultados = await getDocs(consulta);
+
+  let mejorPR = 0;
+
+  resultados.forEach((documento) => {
+    const datos = documento.data();
+
+    if (datos.maxpeso > mejorPR) {
+      mejorPR = datos.maxpeso;
+    }
+  });
+
+  return mejorPR;
+}
+
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -46,15 +73,11 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
-function calcular1RM(peso, reps) {
-    return peso * 36 / (37 - reps);
-}
-
-const rm = calcular1RM(peso, reps);
-
-  let maxpeso = rm;
-
+  const maxpeso = Number(calcular1RM(peso, reps).toFixed(1));
   const volumen = peso * reps * series;
+
+  const prAnterior = await obtenerPR(ejercicio);
+  const esPR = maxpeso > prAnterior;
 
   await addDoc(collection(db, "usuarios", usuarioActual.uid, "registros"), {
     ejercicio,
@@ -65,6 +88,7 @@ const rm = calcular1RM(peso, reps);
     rpe,
     notas,
     volumen,
+    esPR,
     fecha: new Date().toLocaleDateString("es-MX"),
     creado: serverTimestamp()
   });
@@ -94,9 +118,9 @@ function cargarRegistros(uid) {
       lista.innerHTML += `
         <div class="exercise">
           <div>
-            <h3>${r.ejercicio}</h3>
+            <h3>${r.ejercicio} ${r.esPR ? "🏆" : ""}</h3>
             <p>${r.series} series · ${r.reps} reps · ${r.peso} kg</p>
-            <p>Max peso: ${r.maxpeso} kg</p>
+            <p>1RM estimado: ${r.maxpeso} kg</p>
             <p>Volumen: ${r.volumen} kg · ${r.fecha}</p>
             ${r.notas ? `<p>Nota: ${r.notas}</p>` : ""}
           </div>
