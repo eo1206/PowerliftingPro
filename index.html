@@ -1,174 +1,149 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
- <meta charset="UTF-8" />
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>PowerliftingPro</title>
+
   <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+  <meta name="theme-color" content="#0f172a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
+
 <body>
 
-<section id="authScreen" class="auth-screen">
-  <div class="auth-card">
-    <h1>PowerliftingPro</h1>
-    <p>Registra tus entrenamientos</p>
+  <section id="authScreen" class="auth-screen">
+    <div class="auth-card">
+      <h1>PowerliftingPro</h1>
+      <p>Registra tus entrenamientos</p>
 
-    <div class="tabs">
-      <button id="loginTab">Iniciar sesión</button>
-      <button id="registerTab">Crear cuenta</button>
+      <div class="tabs">
+        <button id="loginTab" type="button">Iniciar sesión</button>
+        <button id="registerTab" type="button">Crear cuenta</button>
+      </div>
+
+      <div id="loginBox">
+        <input id="loginNombre" type="text" placeholder="Nombre">
+        <input id="loginPassword" type="password" placeholder="Contraseña">
+        <button id="iniciarSesion" type="button">Entrar</button>
+      </div>
+
+      <div id="registerBox" class="hidden">
+        <input id="regNombre" type="text" placeholder="Nombre">
+        <input id="regPassword" type="password" placeholder="Contraseña">
+        <input id="regConfirmar" type="password" placeholder="Confirmar contraseña">
+        <button id="crearCuenta" type="button">Crear cuenta</button>
+      </div>
     </div>
+  </section>
 
-    <div id="loginBox">
-      <input id="loginNombre" type="text" placeholder="Nombre">
-      <input id="loginPassword" type="password" placeholder="Contraseña">
-      <button id="iniciarSesion">Entrar</button>
-    </div>
+  <section id="appScreen" class="hidden">
+    <main class="app">
 
-    <div id="registerBox" class="hidden">
-      <input id="regNombre" type="text" placeholder="Nombre">
-      <input id="regPassword" type="password" placeholder="Contraseña">
-      <input id="regConfirmar" type="password" placeholder="Confirmar contraseña">
-      <button id="crearCuenta">Crear cuenta</button>
-    </div>
-  </div>
-</section>
-
-<section id="appScreen" class="hidden">
-
-  <main class="app">
-
-
-
-    <header class="header">
-      <div>
-        <p class="label">Registro de entrenamiento</p>
-        <h1>PowerLog</h1>
-      </div>
-      <div class="profile">PL</div>
-    </header>
-
-    <section class="card summary">
-      <div>
-        <p>Rutina actual</p>
-        <h2>Powerlifting</h2>
-      </div>
-      <span>Día 1</span>
-    </section>
-
-    <section class="stats">
-      <div class="stat">
-        <p>Sentadilla</p>
-        <h3>120 kg</h3>
-      </div>
-      <div class="stat">
-        <p>Banca</p>
-        <h3>85 kg</h3>
-      </div>
-      <div class="stat">
-        <p>Peso muerto</p>
-        <h3>150 kg</h3>
-      </div>
-    </section>
-
-    <section class="card">
-      <h2>Registrar ejercicio</h2>
-
-      <form>
-        <label for="exercise">Ejercicio</label>
-        <select id="exercise">
-          <option>Sentadilla</option>
-          <option>Press banca</option>
-          <option>Peso muerto</option>
-          <option>Accesorio</option>
-        </select>
-
-        <div class="grid">
-          <div>
-            <label>Peso</label>
-            <input type="number" placeholder="kg">
-          </div>
-
-          <div>
-            <label>Reps</label>
-            <input type="number" placeholder="5">
-          </div>
-        </div>
-
-        <div class="grid">
-          <div>
-            <label>Series</label>
-            <input type="number" placeholder="3">
-          </div>
-
-          <div>
-            <label>RPE</label>
-            <input type="number" placeholder="8">
-          </div>
-        </div>
-
-        <label>Notas</label>
-        <textarea placeholder="Ej: buena técnica, pesado, dolor, etc."></textarea>
-
-        <button type="submit">Guardar registro</button>
-      </form>
-    </section>
-
-    <section class="card">
-      <h2>Últimos registros</h2>
-
-      <div class="exercise">
+      <header class="header">
         <div>
-          <h3>Sentadilla</h3>
-          <p>3 series · 5 reps · 120 kg</p>
+          <p class="label">Hola, <span id="nombreUsuario"></span></p>
+          <h1>PowerLog</h1>
         </div>
-        <span>RPE 8</span>
-      </div>
 
-      <div class="exercise">
+        <button id="cerrarSesion" type="button" class="logout">Salir</button>
+      </header>
+
+      <section class="card summary">
         <div>
-          <h3>Press banca</h3>
-          <p>4 series · 4 reps · 85 kg</p>
+          <p>Rutina actual</p>
+          <h2>Powerlifting</h2>
         </div>
-        <span>RPE 7</span>
-      </div>
+        <span>Día 1</span>
+      </section>
 
-      <div class="exercise">
-        <div>
-          <h3>Peso muerto</h3>
-          <p>2 series · 3 reps · 150 kg</p>
+      <section class="stats">
+        <div class="stat">
+          <p>Sentadilla</p>
+          <h3>120 kg</h3>
         </div>
-        <span>RPE 9</span>
-      </div>
-    </section>
+        <div class="stat">
+          <p>Banca</p>
+          <h3>85 kg</h3>
+        </div>
+        <div class="stat">
+          <p>Peso muerto</p>
+          <h3>150 kg</h3>
+        </div>
+      </section>
 
-    <nav class="bottom-nav">
-      <a href="#" class="active">Inicio</a>
-      <a href="#">Rutina</a>
-      <a href="#">Progreso</a>
-      <a href="#">Perfil</a>
-    </nav>
+      <section class="card">
+        <h2>Registrar ejercicio</h2>
 
-  </main>
-</section>
+        <form id="trainingForm">
+          <label for="exercise">Ejercicio</label>
+          <select id="exercise">
+            <option>Sentadilla</option>
+            <option>Press banca</option>
+            <option>Peso muerto</option>
+            <option>Accesorio</option>
+          </select>
 
-<script type="module" src="firebase.js"></script>
+          <div class="grid">
+            <div>
+              <label for="peso">Peso</label>
+              <input id="peso" type="number" placeholder="kg">
+            </div>
 
-<script>
-if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("sw.js");
-}
-</script>
-<script type="module" src="firebase.js"></script>
+            <div>
+              <label for="reps">Reps</label>
+              <input id="reps" type="number" placeholder="5">
+            </div>
+          </div>
 
-<script src="app.js"></script>
+          <div class="grid">
+            <div>
+              <label for="series">Series</label>
+              <input id="series" type="number" placeholder="3">
+            </div>
 
+            <div>
+              <label for="rpe">RPE</label>
+              <input id="rpe" type="number" placeholder="8">
+            </div>
+          </div>
 
-<script type="module" src="auth.js"></script>
+          <label for="notas">Notas</label>
+          <textarea id="notas" placeholder="Ej: buena técnica, pesado, dolor, etc."></textarea>
+
+          <button type="submit">Guardar registro</button>
+        </form>
+      </section>
+
+      <section class="card" id="listaRegistros">
+        <h2>Últimos registros</h2>
+      </section>
+
+      <nav class="bottom-nav">
+        <a href="#" class="active">Inicio</a>
+        <a href="#">Rutina</a>
+        <a href="#">Progreso</a>
+        <a href="#">Perfil</a>
+      </nav>
+
+    </main>
+  </section>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js");
+    }
+  </script>
+
+  <script type="module" src="firebase.js"></script>
+  <script type="module" src="auth.js"></script>
+  <script type="module" src="app.js"></script>
 
 </body>
 </html>
