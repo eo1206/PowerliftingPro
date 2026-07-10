@@ -1,8 +1,8 @@
-const CACHE_NAME = "powerlog-v3";
+const CACHE_NAME = "powerlog-v4";
 const APP_SHELL = [
-  "./", "./index.html", "./crear.html", "./rutina.html", "./progreso.html", "./Herramientas.html",
-  "./style.css", "./firebase.js", "./auth.js", "./inicio.js", "./crear.js", "./rutinas.js",
-  "./progreso.js", "./herramientas.js", "./conexion.js", "./utils.js", "./pwa.js", "./manifest.json"
+  "./", "./index.html", "./inicio.html", "./crear.html", "./rutina.html", "./progreso.html", "./Herramientas.html",
+  "./style.css", "./firebase.js", "./auth.js", "./inicio.js", "./crear.js", "./rutinas.js", "./progreso.js",
+  "./herramientas.js", "./guard.js", "./conexion.js", "./utils.js", "./pwa.js", "./manifest.json"
 ];
 
 self.addEventListener("install", (event) => {
@@ -20,7 +20,9 @@ self.addEventListener("fetch", (event) => {
 
   if (event.request.mode === "navigate") {
     event.respondWith(fetch(event.request).then((response) => {
-      const copy = response.clone(); caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy)); return response;
+      const copia = response.clone();
+      caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copia));
+      return response;
     }).catch(() => caches.match(event.request).then((cached) => cached || caches.match("./index.html"))));
     return;
   }

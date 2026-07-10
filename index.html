@@ -1,155 +1,56 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>PowerliftingPro</title>
-
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PowerLog | Iniciar sesión</title>
+  <link rel="stylesheet" href="style.css">
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="apple-touch-icon.png">
-
-  
-
-  <!-- Theme color for supported browsers; provide light/dark variants and a Windows tile color fallback -->
-  <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
-  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-  <meta name="msapplication-TileColor" content="#0f172a">
+  <meta name="theme-color" content="#0f172a">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
-
 <body>
-<div id="estadoConexion" class="estado-conexion hidden"></div>
-<section id="loadingScreen" class="loading-screen">
-  <div class="loader"></div>
-  <p>Cargando PowerLog...</p>
-</section>
-  <section id="authScreen" class="auth-screen hidden">
-    <div class="auth-card">
-      <h1>PowerliftingPro</h1>
-      <p>Registra tus entrenamientos</p>
+  <div id="estadoConexion" class="estado-conexion hidden"></div>
 
-      <div class="tabs">
-        <button id="loginTab" type="button">Iniciar sesión</button>
+  <section id="loadingScreen" class="loading-screen">
+    <div class="loader"></div>
+    <p>Revisando sesión...</p>
+  </section>
+
+  <main id="authScreen" class="auth-screen hidden">
+    <section class="auth-card">
+      <div class="auth-brand">PL</div>
+      <h1>PowerLog</h1>
+      <p>Registra tus entrenamientos y revisa tu progreso.</p>
+
+      <div class="tabs" role="tablist" aria-label="Acceso">
+        <button id="loginTab" class="tab-active" type="button">Iniciar sesión</button>
         <button id="registerTab" type="button">Crear cuenta</button>
       </div>
 
-      <div id="loginBox">
-        <input id="loginNombre" type="text" placeholder="Nombre">
-        <input id="loginPassword" type="password" placeholder="Contraseña">
-        <button id="iniciarSesion" type="button">Entrar</button>
-      </div>
+      <form id="loginBox" autocomplete="on">
+        <label for="loginNombre">Usuario</label>
+        <input id="loginNombre" type="text" autocomplete="username" placeholder="Tu nombre de usuario" required>
+        <label for="loginPassword">Contraseña</label>
+        <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Tu contraseña" required>
+        <button id="iniciarSesion" type="submit">Entrar</button>
+      </form>
 
-      <div id="registerBox" class="hidden">
-        <input id="regNombre" type="text" placeholder="Nombre">
-        <input id="regPassword" type="password" placeholder="Contraseña">
-        <input id="regConfirmar" type="password" placeholder="Confirmar contraseña">
-        <button id="crearCuenta" type="button">Crear cuenta</button>
-      </div>
-    </div>
-  </section>
-
-  <section id="appScreen" class="hidden">
-    <main class="app">
-
-      <header class="header">
-        <div>
-          <p class="label">Hola, <span id="nombreUsuario"></span></p>
-          <h1>PowerLog</h1>
-        </div>
-
-        <button id="cerrarSesion" type="button" class="logout">Salir</button>
-      </header>
-
-      <section class="card summary">
-        <div>
-          <p>Rutina actual</p>
-          <h2>Powerlifting</h2>
-        </div>
-      </section>
-
-      <section class="stats">
-        <div class="stat">
-          <p>Sentadilla</p>
-          <h3> <span id="prSentadilla">0</span> kg</h3>
-        </div>
-        <div class="stat">
-          <p>Banca</p>
-          <h3> <span id="prBanca">0</span> kg</h3>
-        </div>
-        <div class="stat">
-          <p>Peso muerto</p>
-          <h3> <span id="prMuerto">0</span> kg</h3>
-        </div>
-      </section>
-
-      <section class="card">
-        <h2>Registrar ejercicio</h2>
-
-        <form id="trainingForm">
-          <label for="exercise">Ejercicio</label>
-          <select id="exercise">
-            <option>Sentadilla</option>
-            <option>Press banca</option>
-            <option>Peso muerto</option>
-          </select>
-
-          <div class="grid">
-            <div>
-              <label for="peso">Peso</label>
-              <input id="peso" type="number" placeholder="kg">
-            </div>
-
-            <div>
-              <label for="reps">Reps</label>
-              <input id="reps" type="number" placeholder="5">
-            </div>
-          </div>
-
-          <div class="grid">
-            <div>
-              <label for="series">Series</label>
-              <input id="series" type="number" placeholder="3">
-            </div>
-
-            <div>
-              <label for="rpe">RPE</label>
-              <input id="rpe" type="number" placeholder="8">
-            </div>
-          </div>
-
-          <label for="notas">Notas</label>
-          <textarea id="notas" placeholder="Ej: buena técnica, pesado, dolor, etc."></textarea>
-
-          <button type="submit">Guardar registro</button>
-        </form>
-      </section>
-
-      <section class="card" id="listaRegistros">
-        <h2>Últimos registros</h2>
-      </section>
-
-      <section id="inicio" class="page active-page">
-  <!-- aquí va registrar ejercicio y últimos registros -->
-</section>
-
-  <nav class="bottom-nav">
-    <a href="index.html" class="active">Inicio</a>
-    <a href="crear.html">Crear</a>
-    <a href="rutina.html">Rutina</a>
-    <a href="progreso.html">Progreso</a>
-    <a href="Herramientas.html">Herramientas</a>
-  </nav>
-
-    </main>
-  </section>
+      <form id="registerBox" class="hidden" autocomplete="on">
+        <label for="regNombre">Nombre de usuario</label>
+        <input id="regNombre" type="text" autocomplete="username" placeholder="Elige un usuario" required>
+        <label for="regPassword">Contraseña</label>
+        <input id="regPassword" type="password" autocomplete="new-password" placeholder="Mínimo 6 caracteres" required>
+        <label for="regConfirmar">Confirmar contraseña</label>
+        <input id="regConfirmar" type="password" autocomplete="new-password" placeholder="Repite la contraseña" required>
+        <button id="crearCuenta" type="submit">Crear cuenta</button>
+      </form>
+    </section>
+  </main>
 
   <script type="module" src="auth.js"></script>
-  <script type="module" src="inicio.js"></script>
-<script src="conexion.js" defer></script>
-<script src="pwa.js" defer></script>
+  <script src="conexion.js" defer></script>
+  <script src="pwa.js" defer></script>
 </body>
 </html>

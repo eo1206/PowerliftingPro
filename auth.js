@@ -1,215 +1,93 @@
 import { auth, db, authPreparado } from "./firebase.js";
-
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  onAuthStateChanged,
-  signOut
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-import {
-  doc,
-  setDoc,
-  getDoc,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-
-/* Elementos de la interfaz */
-
+const loadingScreen = document.getElementById("loadingScreen");
 const authScreen = document.getElementById("authScreen");
-const appScreen = document.getElementById("appScreen");
-
 const loginTab = document.getElementById("loginTab");
 const registerTab = document.getElementById("registerTab");
-
 const loginBox = document.getElementById("loginBox");
 const registerBox = document.getElementById("registerBox");
 
-const crearCuenta = document.getElementById("crearCuenta");
-const iniciarSesion = document.getElementById("iniciarSesion");
-const cerrarSesion = document.getElementById("cerrarSesion");
+function usuarioAEmail(nombre) {
+  return `${nombre.toLowerCase().trim().replace(/\s+/g, "")}@powerlog.app`;
+}
 
-const nombreUsuario = document.getElementById("nombreUsuario");
+function cambiarPestana(mostrarRegistro) {
+  loginBox.classList.toggle("hidden", mostrarRegistro);
+  registerBox.classList.toggle("hidden", !mostrarRegistro);
+  loginTab.classList.toggle("tab-active", !mostrarRegistro);
+  registerTab.classList.toggle("tab-active", mostrarRegistro);
+}
 
-const loadingScreen = document.getElementById("loadingScreen");
+loginTab.addEventListener("click", () => cambiarPestana(false));
+registerTab.addEventListener("click", () => cambiarPestana(true));
 
-/*
-  Ocultar ambas pantallas mientras Firebase revisa
-  si existe una sesión guardada.
-*/
-
-authScreen?.classList.add("hidden");
-appScreen?.classList.add("hidden");
-
-/* Cambiar entre iniciar sesión y crear cuenta */
-
-loginTab?.addEventListener("click", () => {
-  loginBox?.classList.remove("hidden");
-  registerBox?.classList.add("hidden");
-});
-
-registerTab?.addEventListener("click", () => {
-  registerBox?.classList.remove("hidden");
-  loginBox?.classList.add("hidden");
-});
-
-/* Crear una cuenta */
-
-crearCuenta?.addEventListener("click", async () => {
-  const nombre = document.getElementById("regNombre")?.value.trim();
-  const password = document.getElementById("regPassword")?.value;
-  const confirmar = document.getElementById("regConfirmar")?.value;
-
-  if (!nombre || !password || !confirmar) {
-    alert("Completa todos los campos");
-    return;
-  }
-
-  if (password !== confirmar) {
-    alert("Las contraseñas no coinciden");
-    return;
-  }
-
-  if (password.length < 6) {
-    alert("La contraseña debe tener mínimo 6 caracteres");
-    return;
-  }
-
-  const usuarioLimpio = nombre
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, "");
-
-  const email = `${usuarioLimpio}@powerlog.app`;
+loginBox.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const nombre = document.getElementById("loginNombre").value.trim();
+  const password = document.getElementById("loginPassword").value;
+  if (!nombre || !password) return alert("Completa usuario y contraseña");
 
   try {
     await authPreparado;
+    await signInWithEmailAndPassword(auth, usuarioAEmail(nombre), password);
+    window.location.replace("inicio.html");
+  } catch (error) {
+    console.error(error);
+    if (["auth/invalid-credential", "auth/wrong-password", "auth/user-not-found"].includes(error.code)) {
+      alert("Usuario o contraseña incorrectos");
+    } else if (!navigator.onLine) {
+      alert("No hay conexión. Para iniciar una sesión nueva necesitas internet.");
+    } else {
+      alert("No se pudo iniciar sesión");
+    }
+  }
+});
 
-    const credencial = await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
+registerBox.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const nombre = document.getElementById("regNombre").value.trim();
+  const password = document.getElementById("regPassword").value;
+  const confirmar = document.getElementById("regConfirmar").value;
 
+  if (!nombre || !password || !confirmar) return alert("Completa todos los campos");
+  if (password !== confirmar) return alert("Las contraseñas no coinciden");
+  if (password.length < 6) return alert("La contraseña debe tener mínimo 6 caracteres");
+
+  try {
+    await authPreparado;
+    const credencial = await createUserWithEmailAndPassword(auth, usuarioAEmail(nombre), password);
     await setDoc(doc(db, "usuarios", credencial.user.uid), {
       nombre,
-      usuario: usuarioLimpio,
-      email,
+      usuario: nombre.toLowerCase().trim().replace(/\s+/g, ""),
+      email: usuarioAEmail(nombre),
       creado: serverTimestamp()
     });
-
-    alert("Cuenta creada correctamente");
+    window.location.replace("inicio.html");
   } catch (error) {
-    console.error("Error al crear cuenta:", error);
-
-    if (error.code === "auth/email-already-in-use") {
-      alert("Ese usuario ya está registrado");
-      return;
-    }
-
-    if (error.code === "auth/weak-password") {
-      alert("La contraseña es demasiado débil");
-      return;
-    }
-
-    alert(`${error.code || "Error"}: ${error.message}`);
+    console.error(error);
+    if (error.code === "auth/email-already-in-use") alert("Ese usuario ya está registrado");
+    else if (!navigator.onLine) alert("Necesitas conexión para crear una cuenta");
+    else alert("No se pudo crear la cuenta");
   }
 });
-
-/* Iniciar sesión */
-
-iniciarSesion?.addEventListener("click", async () => {
-  const nombre = document.getElementById("loginNombre")?.value.trim();
-  const password = document.getElementById("loginPassword")?.value;
-
-  if (!nombre || !password) {
-    alert("Completa todos los campos");
-    return;
-  }
-
-  const usuarioLimpio = nombre
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, "");
-
-  const email = `${usuarioLimpio}@powerlog.app`;
-
-  try {
-    await authPreparado;
-
-    await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-  } catch (error) {
-    console.error("Error al iniciar sesión:", error);
-
-    if (
-      error.code === "auth/invalid-credential" ||
-      error.code === "auth/wrong-password" ||
-      error.code === "auth/user-not-found"
-    ) {
-      alert("Usuario o contraseña incorrectos");
-      return;
-    }
-
-    alert(`${error.code || "Error"}: ${error.message}`);
-  }
-});
-
-/* Cerrar sesión únicamente cuando el usuario lo decida */
-
-cerrarSesion?.addEventListener("click", async () => {
-  try {
-    await signOut(auth);
-  } catch (error) {
-    console.error("Error al cerrar sesión:", error);
-    alert("No se pudo cerrar la sesión");
-  }
-});
-
-/* Esperar a que Firebase configure la persistencia */
 
 try {
   await authPreparado;
-} catch (error) {
-  console.error("No se pudo configurar la persistencia:", error);
-}
-
-/* Mostrar la pantalla correspondiente según la sesión */
-try {
-  await authPreparado;
-} catch (error) {
-  console.error("No se pudo preparar la sesión:", error);
-}
-
-onAuthStateChanged(auth, async (user) => {
-  authScreen?.classList.add("hidden");
-  appScreen?.classList.add("hidden");
-
-  if (user) {
-    appScreen?.classList.remove("hidden");
-
-    if (nombreUsuario) {
-      nombreUsuario.textContent = "Usuario";
+  onAuthStateChanged(auth, (user) => {
+    if (user) window.location.replace("inicio.html");
+    else {
+      loadingScreen.classList.add("hidden");
+      authScreen.classList.remove("hidden");
     }
-
-    try {
-      const documento = await getDoc(
-        doc(db, "usuarios", user.uid)
-      );
-
-      if (documento.exists() && nombreUsuario) {
-        nombreUsuario.textContent =
-          documento.data().nombre || "Usuario";
-      }
-    } catch (error) {
-      console.warn("No se pudo cargar el perfil:", error);
-    }
-  } else {
-    authScreen?.classList.remove("hidden");
-  }
-
-  loadingScreen?.classList.add("hidden");
-});
+  });
+} catch (error) {
+  console.error(error);
+  loadingScreen.classList.add("hidden");
+  authScreen.classList.remove("hidden");
+}

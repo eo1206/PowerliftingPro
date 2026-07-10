@@ -3,78 +3,40 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PowerliftingPro | Progreso</title>
+  <title>PowerLog | Progreso</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
 </head>
 <body>
-<div id="estadoConexion" class="estado-conexion hidden"></div>
-<main class="app">
+  <div id="estadoConexion" class="estado-conexion hidden"></div>
+  <main id="appProtegida" class="app hidden">
+    <header class="header"><div><p class="label">Estadísticas</p><h1>Progreso</h1></div><div class="profile">PL</div></header>
 
-  <header class="header">
-    <div>
-      <p class="label">Estadísticas</p>
-      <h1>Progreso</h1>
-    </div>
-    <div class="profile">PL</div>
-  </header>
+    <section class="stats">
+      <div class="stat"><p>PR Sentadilla</p><h3><span id="prSentadilla">0</span> kg</h3></div>
+      <div class="stat"><p>PR Banca</p><h3><span id="prBanca">0</span> kg</h3></div>
+      <div class="stat"><p>PR Muerto</p><h3><span id="prMuerto">0</span> kg</h3></div>
+    </section>
 
-  <section class="stats">
-    <div class="stat">
-      <p>PR Sentadilla</p>
-      <h3><span id="prSentadilla">0</span> kg</h3>
-    </div>
+    <section class="card"><h2>Resumen general</h2><div class="progress-summary"><p>Registros: <strong id="totalEntrenamientos">0</strong></p><p>Volumen total: <strong id="volumenTotal">0 kg</strong></p></div></section>
 
-    <div class="stat">
-      <p>PR Banca</p>
-      <h3><span id="prBanca">0</span> kg</h3>
-    </div>
+    <section class="card chart-card">
+      <h2>Progreso por fecha</h2>
+      <label for="ejercicioGrafica">Ejercicio</label>
+      <select id="ejercicioGrafica"><option>Sentadilla</option><option>Press banca</option><option>Peso muerto</option></select>
+      <div class="chart-legend"><span>Vertical: peso / 1RM estimado (kg)</span><span>Horizontal: fecha</span></div>
+      <div class="chart-wrap"><canvas id="graficaMaximos" aria-label="Gráfica de peso por fecha"></canvas></div>
+      <p id="detallePunto" class="chart-detail">Toca un punto para ver peso y fecha.</p>
+      <div id="tablaProgreso" class="progress-table"></div>
+    </section>
 
-    <div class="stat">
-      <p>PR Muerto</p>
-      <h3><span id="prMuerto">0</span> kg</h3>
-    </div>
-  </section>
+    <section class="card" id="ultimosRegistros"><h2>Últimos registros</h2><p class="empty">Cargando...</p></section>
 
-  <section class="card">
-    <h2>Resumen general</h2>
-    <div class="progress-summary">
-      <p>Registros: <strong id="totalEntrenamientos">0</strong></p>
-      <p>Volumen total: <strong id="volumenTotal">0 kg</strong></p>
-    </div>
-  </section>
+    <nav class="bottom-nav"><a href="inicio.html">Inicio</a><a href="crear.html">Crear</a><a href="rutina.html">Rutina</a><a href="progreso.html" class="active">Progreso</a><a href="Herramientas.html">Herramientas</a></nav>
+  </main>
+  <section id="loadingScreen" class="loading-screen"><div class="loader"></div><p>Cargando progreso...</p></section>
 
-<section class="card">
-  <h2>Progreso de pesos máximos</h2>
-
-  <label for="ejercicioGrafica">Ejercicio</label>
-  <select id="ejercicioGrafica">
-    <option value="Sentadilla">Sentadilla</option>
-    <option value="Press banca">Press banca</option>
-    <option value="Peso muerto">Peso muerto</option>
-  </select>
-
-  <canvas id="graficaMaximos" width="350" height="220"></canvas>
-</section>
-
-
-  <section class="card" id="ultimosRegistros">
-    <h2>Últimos registros</h2>
-    <p class="empty">Cargando...</p>
-  </section>
-
- <nav class="bottom-nav">
-    <a href="index.html">Inicio</a>
-    <a href="crear.html">Crear</a>
-    <a href="rutina.html">Rutina</a>
-    <a href="progreso.html" class="active">Progreso</a>
-    <a href="Herramientas.html">Herramientas</a>
-  </nav>
-
-
-</main>
-
-<script type="module" src="progreso.js"></script>
-<script src="conexion.js" defer></script>
-<script src="pwa.js" defer></script>
+  <script type="module" src="progreso.js"></script>
+  <script src="conexion.js" defer></script><script src="pwa.js" defer></script>
 </body>
 </html>

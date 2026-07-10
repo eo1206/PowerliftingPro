@@ -34,7 +34,7 @@ try {
 
 onAuthStateChanged(auth, (user) => {
   if (!user) {
-    if (navigator.onLine) window.location.replace("index.html");
+    window.location.replace("index.html");
     return;
   }
 
@@ -222,6 +222,7 @@ async function guardarSesionRutina() {
       totalEjercicios: rutinaActual.ejercicios.length,
       ejerciciosCompletados: ejerciciosFiltrados.length,
       fecha: new Date().toLocaleDateString("es-MX"),
+      fechaISO: new Date().toISOString(),
       creado: serverTimestamp()
     });
 

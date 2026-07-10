@@ -15,7 +15,7 @@ let ejercicios = [];
 await authPreparado.catch(console.error);
 onAuthStateChanged(auth, (user) => {
   usuarioActual = user;
-  if (!user && navigator.onLine) window.location.replace("index.html");
+  if (!user) window.location.replace("index.html");
 });
 
 elementos.agregar?.addEventListener("click", () => {
