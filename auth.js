@@ -31,6 +31,8 @@ const cerrarSesion = document.getElementById("cerrarSesion");
 
 const nombreUsuario = document.getElementById("nombreUsuario");
 
+const loadingScreen = document.getElementById("loadingScreen");
+
 /*
   Ocultar ambas pantallas mientras Firebase revisa
   si existe una sesión guardada.
@@ -176,10 +178,17 @@ try {
 }
 
 /* Mostrar la pantalla correspondiente según la sesión */
+try {
+  await authPreparado;
+} catch (error) {
+  console.error("No se pudo preparar la sesión:", error);
+}
 
 onAuthStateChanged(auth, async (user) => {
+  authScreen?.classList.add("hidden");
+  appScreen?.classList.add("hidden");
+
   if (user) {
-    authScreen?.classList.add("hidden");
     appScreen?.classList.remove("hidden");
 
     if (nombreUsuario) {
@@ -187,20 +196,20 @@ onAuthStateChanged(auth, async (user) => {
     }
 
     try {
-      const referenciaUsuario = doc(db, "usuarios", user.uid);
-      const documentoUsuario = await getDoc(referenciaUsuario);
+      const documento = await getDoc(
+        doc(db, "usuarios", user.uid)
+      );
 
-      if (documentoUsuario.exists() && nombreUsuario) {
+      if (documento.exists() && nombreUsuario) {
         nombreUsuario.textContent =
-          documentoUsuario.data().nombre || "Usuario";
+          documento.data().nombre || "Usuario";
       }
     } catch (error) {
       console.warn("No se pudo cargar el perfil:", error);
     }
-
-    return;
+  } else {
+    authScreen?.classList.remove("hidden");
   }
 
-  appScreen?.classList.add("hidden");
-  authScreen?.classList.remove("hidden");
+  loadingScreen?.classList.add("hidden");
 });
