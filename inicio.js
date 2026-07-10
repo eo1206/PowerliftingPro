@@ -117,3 +117,5 @@ function renderizar() {
       <div class="right"><span>${r.rpe == null ? "Sin RPE" : `RPE ${Number(r.rpe)}`}</span><button class="delete" data-id="${r.id}" type="button" aria-label="Eliminar">×</button></div></article>`;
   }).join("")}`;
 }
+
+let pesototal = prMuerto + prBanca + prSentadilla;
