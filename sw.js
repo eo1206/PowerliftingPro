@@ -1,34 +1,87 @@
-const CACHE_NAME = "powerlog-v4";
+const CACHE_NAME = "powerlog-v6";
+
 const APP_SHELL = [
-  "./", "./index.html", "./inicio.html", "./crear.html", "./rutina.html", "./progreso.html", "./Herramientas.html",
-  "./style.css", "./firebase.js", "./auth.js", "./inicio.js", "./crear.js", "./rutinas.js", "./progreso.js",
-  "./herramientas.js", "./guard.js", "./conexion.js", "./utils.js", "./pwa.js", "./manifest.json"
+  "./",
+  "./index.html",
+  "./inicio.html",
+  "./crear.html",
+  "./rutina.html",
+  "./progreso.html",
+  "./Herramientas.html",
+  "./style.css?v=6",
+  "./firebase.js",
+  "./auth.js",
+  "./inicio.js",
+  "./crear.js",
+  "./rutinas.js",
+  "./progreso.js",
+  "./herramientas.js",
+  "./guard.js",
+  "./conexion.js",
+  "./utils.js",
+  "./pwa.js",
+  "./manifest.json"
 ];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(APP_SHELL))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))).then(() => self.clients.claim()));
+  event.waitUntil(
+    caches.keys()
+      .then((keys) => Promise.all(
+        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+      ))
+      .then(() => self.clients.claim())
+  );
 });
+
+async function networkFirst(request) {
+  const cache = await caches.open(CACHE_NAME);
+  try {
+    const response = await fetch(request, { cache: "no-store" });
+    if (response && response.ok) await cache.put(request, response.clone());
+    return response;
+  } catch (error) {
+    const cached = await cache.match(request);
+    if (cached) return cached;
+    throw error;
+  }
+}
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
 
-  if (event.request.mode === "navigate") {
-    event.respondWith(fetch(event.request).then((response) => {
-      const copia = response.clone();
-      caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copia));
-      return response;
-    }).catch(() => caches.match(event.request).then((cached) => cached || caches.match("./index.html"))));
+  const isPage = event.request.mode === "navigate";
+  const isCodeAsset = ["style", "script", "worker"].includes(event.request.destination);
+
+  if (isPage || isCodeAsset) {
+    event.respondWith(
+      networkFirst(event.request).catch(async () => {
+        if (isPage) return caches.match("./index.html");
+        return Response.error();
+      })
+    );
     return;
   }
 
-  event.respondWith(caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
-    if (response.ok) caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()));
-    return response;
-  })));
+  event.respondWith(
+    caches.match(event.request).then(async (cached) => {
+      if (cached) return cached;
+      const response = await fetch(event.request);
+      if (response && response.ok) {
+        const cache = await caches.open(CACHE_NAME);
+        await cache.put(event.request, response.clone());
+      }
+      return response;
+    })
+  );
 });

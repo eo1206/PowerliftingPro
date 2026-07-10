@@ -1,7 +1,12 @@
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js").catch((error) => {
+  window.addEventListener("load", async () => {
+    try {
+      const registro = await navigator.serviceWorker.register("./sw.js", {
+        updateViaCache: "none"
+      });
+      await registro.update();
+    } catch (error) {
       console.error("No se pudo registrar el Service Worker:", error);
-    });
-  }, { once: true });
+    }
+  });
 }
