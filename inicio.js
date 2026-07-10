@@ -118,4 +118,5 @@ function renderizar() {
   }).join("")}`;
 }
 
-let pesoTotal = prMuerto + prBanca + prSentadilla;
+const pesoTotal = prMuerto + prBanca + prSentadilla;
+document.getElementById("pesoTotal").textContent = pesoTotal.toFixed(1);
