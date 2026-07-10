@@ -54,7 +54,7 @@ ejercicioGrafica?.addEventListener("change", () => {
 });
 
 /* Esperar a que Firebase restaure la sesión guardada */
-let usuarioActual = null;
+
 
 try {
   await authPreparado;
