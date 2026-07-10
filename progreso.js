@@ -1,631 +1,111 @@
 import { auth, db, authPreparado } from "./firebase.js";
+import { collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+import { calcular1RM, escaparHTML } from "./utils.js";
 
-import {
-  collection,
-  query,
-  orderBy,
-  onSnapshot
-} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-
-import {
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-
-/* =========================
-   ELEMENTOS DEL HTML
-========================= */
-
-const prSentadilla = document.getElementById("prSentadilla");
-const prBanca = document.getElementById("prBanca");
-const prMuerto = document.getElementById("prMuerto");
-
-const totalEntrenamientos =
-  document.getElementById("totalEntrenamientos");
-
-const volumenTotal =
-  document.getElementById("volumenTotal");
-
-const volSentadilla =
-  document.getElementById("volSentadilla");
-
-const volBanca =
-  document.getElementById("volBanca");
-
-const volMuerto =
-  document.getElementById("volMuerto");
-
-const ultimosRegistros =
-  document.getElementById("ultimosRegistros");
-
-const ejercicioGrafica =
-  document.getElementById("ejercicioGrafica");
-
-const canvasGrafica =
-  document.getElementById("graficaMaximos");
-
-const ctx = canvasGrafica
-  ? canvasGrafica.getContext("2d")
-  : null;
-
-/* =========================
-   VARIABLES
-========================= */
-
-let usuarioActual = null;
-
-let registrosNormales = [];
-let registrosRutina = [];
-let registrosGlobales = [];
-
-let cancelarRegistros = null;
+const ui = {
+  sentadilla: document.getElementById("prSentadilla"), banca: document.getElementById("prBanca"), muerto: document.getElementById("prMuerto"),
+  total: document.getElementById("totalEntrenamientos"), volumen: document.getElementById("volumenTotal"),
+  lista: document.getElementById("ultimosRegistros"), ejercicio: document.getElementById("ejercicioGrafica"),
+  canvas: document.getElementById("graficaMaximos")
+};
+let normales = [];
+let rutinas = [];
+let cancelarNormales = null;
 let cancelarRutinas = null;
 
-/* =========================
-   CAMBIAR GRÁFICA
-========================= */
-
-ejercicioGrafica?.addEventListener("change", () => {
-  dibujarGraficaMaximos(ejercicioGrafica.value);
-});
-
-/* =========================
-   RESTAURAR SESIÓN
-========================= */
-
-try {
-  await authPreparado;
-} catch (error) {
-  console.error("No se pudo restaurar la sesión:", error);
-}
-
+await authPreparado.catch(console.error);
 onAuthStateChanged(auth, (user) => {
+  cancelarNormales?.(); cancelarRutinas?.();
   if (!user) {
-    window.location.replace("index.html");
+    if (navigator.onLine) window.location.replace("index.html");
     return;
   }
+  cancelarNormales = escuchar(user.uid, "registros", (doc) => {
+    const r = doc.data();
+    return { id: doc.id, ejercicio: r.ejercicio || "", peso: +r.peso || 0, reps: +r.reps || 0, series: +r.series || 0,
+      volumen: +r.volumen || 0, maxpeso: +r.maxpeso || calcular1RM(r.peso, r.reps), fecha: r.fecha || "", creado: r.creado, origen: "registro" };
+  }, (datos) => { normales = datos; renderizar(); });
 
-  usuarioActual = user;
-
-  escucharRegistrosNormales(user.uid);
-  escucharRegistrosRutina(user.uid);
+  cancelarRutinas = escuchar(user.uid, "registrosRutina", (doc) => {
+    const s = doc.data();
+    return (Array.isArray(s.ejercicios) ? s.ejercicios : []).map((e, i) => {
+      const peso = +e.pesoReal || 0, reps = +e.repsReal || 0, series = +e.seriesReal || +e.seriesObjetivo || 1;
+      return { id: `${doc.id}-${i}`, ejercicio: e.ejercicio || "", peso, reps, series, volumen: peso * reps * series,
+        maxpeso: calcular1RM(peso, reps), fecha: s.fecha || "", creado: s.creado, origen: "rutina", nombreRutina: s.nombreRutina || "Rutina" };
+    });
+  }, (datos) => { rutinas = datos.flat(); renderizar(); });
 });
 
-/* =========================
-   LEER REGISTROS DE INICIO
-========================= */
-
-function escucharRegistrosNormales(uid) {
-  if (cancelarRegistros) {
-    cancelarRegistros();
-  }
-
-  const consulta = query(
-    collection(db, "usuarios", uid, "registros"),
-    orderBy("creado", "desc")
-  );
-
-  cancelarRegistros = onSnapshot(
-    consulta,
-
-    (snapshot) => {
-      registrosNormales = [];
-
-      snapshot.forEach((documento) => {
-        const r = documento.data();
-
-        registrosNormales.push({
-          id: documento.id,
-          origen: "registro",
-          ejercicio: r.ejercicio || "",
-          peso: Number(r.peso) || 0,
-          reps: Number(r.reps) || 0,
-          series: Number(r.series) || 0,
-          rpe: Number(r.rpe) || 0,
-          volumen: Number(r.volumen) || 0,
-          maxpeso: Number(r.maxpeso) || 0,
-          fecha: r.fecha || "",
-          creado: r.creado || null
-        });
-      });
-
-      combinarYMostrar();
-    },
-
-    (error) => {
-      console.error("Error al leer registros normales:", error);
-    }
-  );
+function escuchar(uid, coleccion, transformar, actualizar) {
+  const q = query(collection(db, "usuarios", uid, coleccion), orderBy("creado", "desc"));
+  return onSnapshot(q, { includeMetadataChanges: true }, (snapshot) => actualizar(snapshot.docs.map(transformar)), console.error);
 }
 
-/* =========================
-   LEER REGISTROS DE RUTINA
-========================= */
+ui.ejercicio?.addEventListener("change", renderizar);
+window.addEventListener("resize", () => dibujar(combinar(), ui.ejercicio?.value || "Sentadilla"));
 
-function escucharRegistrosRutina(uid) {
-  if (cancelarRutinas) {
-    cancelarRutinas();
-  }
-
-  const consulta = query(
-    collection(db, "usuarios", uid, "registrosRutina"),
-    orderBy("creado", "desc")
-  );
-
-  cancelarRutinas = onSnapshot(
-    consulta,
-
-    (snapshot) => {
-      registrosRutina = [];
-
-      snapshot.forEach((documento) => {
-        const sesion = documento.data();
-
-        const ejercicios = Array.isArray(sesion.ejercicios)
-          ? sesion.ejercicios
-          : [];
-
-        ejercicios.forEach((ejercicio, index) => {
-          const peso = Number(ejercicio.pesoReal) || 0;
-          const reps = Number(ejercicio.repsReal) || 0;
-
-          const series =
-            Number(ejercicio.seriesReal) ||
-            Number(ejercicio.seriesObjetivo) ||
-            1;
-
-          const volumen = peso * reps * series;
-
-          registrosRutina.push({
-            id: `${documento.id}-${index}`,
-            origen: "rutina",
-            nombreRutina: sesion.nombreRutina || "Rutina",
-            ejercicio: ejercicio.ejercicio || "",
-            peso,
-            reps,
-            series,
-            rpe: Number(ejercicio.rpeReal) || 0,
-            volumen,
-            maxpeso: calcular1RM(peso, reps),
-            fecha: sesion.fecha || "",
-            creado: sesion.creado || null
-          });
-        });
-      });
-
-      combinarYMostrar();
-    },
-
-    (error) => {
-      console.error("Error al leer registros de rutina:", error);
-    }
-  );
+function combinar() {
+  return [...normales, ...rutinas].sort((a, b) => tiempo(b) - tiempo(a));
 }
 
-/* =========================
-   COMBINAR COLECCIONES
-========================= */
+function renderizar() {
+  const datos = combinar();
+  const maximos = { "Sentadilla": 0, "Press banca": 0, "Peso muerto": 0 };
+  let volumen = 0;
+  for (const r of datos) {
+    volumen += r.volumen || 0;
+    if (r.ejercicio in maximos) maximos[r.ejercicio] = Math.max(maximos[r.ejercicio], r.maxpeso || 0);
+  }
+  if (ui.sentadilla) ui.sentadilla.textContent = maximos["Sentadilla"].toFixed(1);
+  if (ui.banca) ui.banca.textContent = maximos["Press banca"].toFixed(1);
+  if (ui.muerto) ui.muerto.textContent = maximos["Peso muerto"].toFixed(1);
+  if (ui.total) ui.total.textContent = `${datos.length} registros`;
+  if (ui.volumen) ui.volumen.textContent = `${volumen.toFixed(1)} kg`;
 
-function combinarYMostrar() {
-  registrosGlobales = [
-    ...registrosNormales,
-    ...registrosRutina
-  ].sort((a, b) => obtenerTiempo(b) - obtenerTiempo(a));
-
-  mostrarProgreso();
+  if (ui.lista) ui.lista.innerHTML = `<h2>Últimos registros</h2>${datos.length ? datos.slice(0, 10).map((r) => `
+    <div class="exercise"><div><h3>${escaparHTML(r.ejercicio || "Ejercicio")}</h3>
+    <p>${r.series} series · ${r.reps} reps · ${r.peso} kg</p><p>1RM estimado: ${r.maxpeso.toFixed(1)} kg</p>
+    <p>Volumen: ${r.volumen.toFixed(1)} kg · ${escaparHTML(r.fecha)}</p>${r.nombreRutina ? `<p>Rutina: ${escaparHTML(r.nombreRutina)}</p>` : ""}</div></div>`).join("") : '<p class="empty">Todavía no hay registros.</p>'}`;
+  dibujar(datos, ui.ejercicio?.value || "Sentadilla");
 }
 
-/* =========================
-   CALCULAR Y MOSTRAR PROGRESO
-========================= */
+function tiempo(r) {
+  if (r.creado?.toMillis) return r.creado.toMillis();
+  if (r.creado?.seconds) return r.creado.seconds * 1000;
+  const [d, m, a] = String(r.fecha || "").split("/").map(Number);
+  return a ? new Date(a, m - 1, d).getTime() : 0;
+}
 
-function mostrarProgreso() {
-  let mejorSentadilla = 0;
-  let mejorBanca = 0;
-  let mejorMuerto = 0;
-
-  let volumenGeneral = 0;
-  let volumenSentadilla = 0;
-  let volumenBanca = 0;
-  let volumenMuerto = 0;
-
-  ultimosRegistros.innerHTML =
-    "<h2>Últimos registros</h2>";
-
-  if (registrosGlobales.length === 0) {
-    limpiarValores();
-
-    ultimosRegistros.innerHTML += `
-      <p class="empty">
-        Todavía no hay registros.
-      </p>
-    `;
-
-    dibujarGraficaMaximos(
-      ejercicioGrafica?.value || "Sentadilla"
-    );
-
-    return;
+function dibujar(datos, ejercicio) {
+  const canvas = ui.canvas;
+  if (!canvas) return;
+  const rect = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.max(300, Math.round(rect.width * dpr));
+  canvas.height = Math.round(220 * dpr);
+  const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+  const w = canvas.width / dpr, h = canvas.height / dpr;
+  ctx.clearRect(0, 0, w, h);
+  const puntos = datos.filter((r) => r.ejercicio === ejercicio && r.maxpeso > 0).sort((a, b) => tiempo(a) - tiempo(b));
+  if (!puntos.length) {
+    ctx.fillStyle = "#94a3b8"; ctx.font = "14px Arial"; ctx.textAlign = "center";
+    ctx.fillText("No hay datos para este ejercicio", w / 2, h / 2); return;
   }
-
-  registrosGlobales.forEach((r) => {
-    const volumen = Number(r.volumen) || 0;
-    const maxpeso = Number(r.maxpeso) || 0;
-
-    volumenGeneral += volumen;
-
-    if (r.ejercicio === "Sentadilla") {
-      volumenSentadilla += volumen;
-
-      if (maxpeso > mejorSentadilla) {
-        mejorSentadilla = maxpeso;
-      }
-    }
-
-    if (r.ejercicio === "Press banca") {
-      volumenBanca += volumen;
-
-      if (maxpeso > mejorBanca) {
-        mejorBanca = maxpeso;
-      }
-    }
-
-    if (r.ejercicio === "Peso muerto") {
-      volumenMuerto += volumen;
-
-      if (maxpeso > mejorMuerto) {
-        mejorMuerto = maxpeso;
-      }
-    }
+  const pad = { l: 48, r: 18, t: 24, b: 36 };
+  const vals = puntos.map((p) => p.maxpeso), min = Math.max(0, Math.min(...vals) - 5), max = Math.max(...vals) + 5, rango = max - min || 1;
+  ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 3; ctx.beginPath();
+  puntos.forEach((p, i) => {
+    const x = puntos.length === 1 ? w / 2 : pad.l + i * (w - pad.l - pad.r) / (puntos.length - 1);
+    const y = h - pad.b - (p.maxpeso - min) * (h - pad.t - pad.b) / rango;
+    i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
   });
-
-  registrosGlobales.slice(0, 8).forEach((r) => {
-    ultimosRegistros.innerHTML += `
-      <div class="exercise">
-        <div>
-          <h3>${r.ejercicio || "Ejercicio"}</h3>
-
-          <p>
-            ${r.series} series ·
-            ${r.reps} reps ·
-            ${r.peso} kg
-          </p>
-
-          <p>
-            1RM estimado:
-            ${Number(r.maxpeso).toFixed(1)} kg
-          </p>
-
-          <p>
-            Volumen:
-            ${Number(r.volumen).toFixed(1)} kg ·
-            ${r.fecha || ""}
-          </p>
-
-          ${
-            r.origen === "rutina"
-              ? `<p>Rutina: ${r.nombreRutina}</p>`
-              : ""
-          }
-        </div>
-      </div>
-    `;
-  });
-
-  prSentadilla.textContent =
-    mejorSentadilla.toFixed(1);
-
-  prBanca.textContent =
-    mejorBanca.toFixed(1);
-
-  prMuerto.textContent =
-    mejorMuerto.toFixed(1);
-
-  totalEntrenamientos.textContent =
-    `${registrosGlobales.length} registros`;
-
-  volumenTotal.textContent =
-    `${volumenGeneral.toFixed(1)} kg`;
-
-  volSentadilla.textContent =
-    `${volumenSentadilla.toFixed(1)} kg`;
-
-  volBanca.textContent =
-    `${volumenBanca.toFixed(1)} kg`;
-
-  volMuerto.textContent =
-    `${volumenMuerto.toFixed(1)} kg`;
-
-  dibujarGraficaMaximos(
-    ejercicioGrafica?.value || "Sentadilla"
-  );
-}
-
-/* =========================
-   CALCULAR 1RM
-========================= */
-
-function calcular1RM(peso, reps) {
-  if (peso <= 0 || reps <= 0) {
-    return 0;
-  }
-
-  if (reps === 1) {
-    return Number(peso.toFixed(1));
-  }
-
-  if (reps >= 37) {
-    return 0;
-  }
-
-  const resultado =
-    (peso * 36) / (37 - reps);
-
-  return Number(resultado.toFixed(1));
-}
-
-/* =========================
-   LIMPIAR VALORES
-========================= */
-
-function limpiarValores() {
-  prSentadilla.textContent = "0.0";
-  prBanca.textContent = "0.0";
-  prMuerto.textContent = "0.0";
-
-  totalEntrenamientos.textContent =
-    "0 registros";
-
-  volumenTotal.textContent =
-    "0 kg";
-
-  volSentadilla.textContent =
-    "0 kg";
-
-  volBanca.textContent =
-    "0 kg";
-
-  volMuerto.textContent =
-    "0 kg";
-}
-
-/* =========================
-   GRÁFICA
-========================= */
-
-function dibujarGraficaMaximos(ejercicioBuscado) {
-  if (!ctx || !canvasGrafica) {
-    return;
-  }
-
-  const datos = registrosGlobales
-    .filter((registro) => {
-      return (
-        registro.ejercicio === ejercicioBuscado &&
-        Number(registro.maxpeso) > 0
-      );
-    })
-    .sort((a, b) => {
-      return obtenerTiempo(a) - obtenerTiempo(b);
-    });
-
-  ctx.clearRect(
-    0,
-    0,
-    canvasGrafica.width,
-    canvasGrafica.height
-  );
-
-  ctx.fillStyle = "#334155";
-
-  ctx.fillRect(
-    0,
-    0,
-    canvasGrafica.width,
-    canvasGrafica.height
-  );
-
-  if (datos.length === 0) {
-    ctx.fillStyle = "#94a3b8";
-    ctx.font = "14px Arial";
-    ctx.textAlign = "center";
-
-    ctx.fillText(
-      "No hay datos para este ejercicio",
-      canvasGrafica.width / 2,
-      canvasGrafica.height / 2
-    );
-
-    ctx.textAlign = "start";
-    return;
-  }
-
-  const paddingIzquierdo = 55;
-  const paddingDerecho = 20;
-  const paddingSuperior = 30;
-  const paddingInferior = 45;
-
-  const ancho =
-    canvasGrafica.width -
-    paddingIzquierdo -
-    paddingDerecho;
-
-  const alto =
-    canvasGrafica.height -
-    paddingSuperior -
-    paddingInferior;
-
-  const valores = datos.map((dato) =>
-    Number(dato.maxpeso)
-  );
-
-  let minimo = Math.min(...valores);
-  let maximo = Math.max(...valores);
-
-  const margen = Math.max(
-    (maximo - minimo) * 0.15,
-    5
-  );
-
-  minimo = Math.max(0, minimo - margen);
-  maximo += margen;
-
-  const rango = maximo - minimo || 1;
-
-  ctx.font = "11px Arial";
-  ctx.textAlign = "right";
-  ctx.textBaseline = "middle";
-
-  const divisiones = 4;
-
-  for (let i = 0; i <= divisiones; i++) {
-    const porcentaje = i / divisiones;
-    const y = paddingSuperior + porcentaje * alto;
-    const valor = maximo - porcentaje * rango;
-
-    ctx.strokeStyle =
-      "rgba(148, 163, 184, 0.18)";
-
-    ctx.beginPath();
-    ctx.moveTo(paddingIzquierdo, y);
-
-    ctx.lineTo(
-      canvasGrafica.width - paddingDerecho,
-      y
-    );
-
-    ctx.stroke();
-
-    ctx.fillStyle = "#cbd5e1";
-
-    ctx.fillText(
-      `${valor.toFixed(1)} kg`,
-      paddingIzquierdo - 7,
-      y
-    );
-  }
-
-  ctx.beginPath();
-
-  datos.forEach((dato, indice) => {
-    const x =
-      datos.length === 1
-        ? paddingIzquierdo + ancho / 2
-        : paddingIzquierdo +
-          (indice * ancho) /
-          (datos.length - 1);
-
-    const y =
-      canvasGrafica.height -
-      paddingInferior -
-      ((Number(dato.maxpeso) - minimo) /
-        rango) *
-        alto;
-
-    if (indice === 0) {
-      ctx.moveTo(x, y);
-    } else {
-      ctx.lineTo(x, y);
-    }
-  });
-
-  ctx.strokeStyle = "#ef4444";
-  ctx.lineWidth = 3;
   ctx.stroke();
-
-  datos.forEach((dato, indice) => {
-    const x =
-      datos.length === 1
-        ? paddingIzquierdo + ancho / 2
-        : paddingIzquierdo +
-          (indice * ancho) /
-          (datos.length - 1);
-
-    const y =
-      canvasGrafica.height -
-      paddingInferior -
-      ((Number(dato.maxpeso) - minimo) /
-        rango) *
-        alto;
-
-    ctx.beginPath();
-    ctx.arc(x, y, 5, 0, Math.PI * 2);
-
-    ctx.fillStyle = "#ef4444";
-    ctx.fill();
-
-    ctx.fillStyle = "#f8fafc";
-    ctx.font = "11px Arial";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "bottom";
-
-    ctx.fillText(
-      Number(dato.maxpeso).toFixed(1),
-      x,
-      y - 8
-    );
-
-    ctx.fillStyle = "#94a3b8";
-    ctx.font = "10px Arial";
-    ctx.textBaseline = "top";
-
-    ctx.fillText(
-      obtenerFechaCorta(dato),
-      x,
-      canvasGrafica.height -
-        paddingInferior +
-        10
-    );
+  ctx.fillStyle = "#ef4444";
+  puntos.forEach((p, i) => {
+    const x = puntos.length === 1 ? w / 2 : pad.l + i * (w - pad.l - pad.r) / (puntos.length - 1);
+    const y = h - pad.b - (p.maxpeso - min) * (h - pad.t - pad.b) / rango;
+    ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill();
   });
-
-  ctx.textAlign = "start";
-  ctx.textBaseline = "alphabetic";
-}
-
-/* =========================
-   FECHAS
-========================= */
-
-function obtenerTiempo(registro) {
-  if (registro.creado?.toMillis) {
-    return registro.creado.toMillis();
-  }
-
-  if (registro.creado?.seconds) {
-    return registro.creado.seconds * 1000;
-  }
-
-  if (registro.fecha) {
-    const partes = registro.fecha.split("/");
-
-    if (partes.length === 3) {
-      const dia = Number(partes[0]);
-      const mes = Number(partes[1]) - 1;
-      const anio = Number(partes[2]);
-
-      return new Date(anio, mes, dia).getTime();
-    }
-  }
-
-  return 0;
-}
-
-function obtenerFechaCorta(registro) {
-  if (registro.creado?.toDate) {
-    return registro.creado
-      .toDate()
-      .toLocaleDateString("es-MX", {
-        day: "2-digit",
-        month: "2-digit"
-      });
-  }
-
-  if (registro.fecha) {
-    const partes = registro.fecha.split("/");
-
-    if (partes.length >= 2) {
-      return `${partes[0]}/${partes[1]}`;
-    }
-  }
-
-  return "";
 }

@@ -37,6 +37,11 @@
 
   <section class="card">
     <h2>Resumen general</h2>
+    <div class="progress-summary">
+      <p>Registros: <strong id="totalEntrenamientos">0</strong></p>
+      <p>Volumen total: <strong id="volumenTotal">0 kg</strong></p>
+    </div>
+  </section>
 
 <section class="card">
   <h2>Progreso de pesos máximos</h2>
@@ -50,10 +55,6 @@
 
   <canvas id="graficaMaximos" width="350" height="220"></canvas>
 </section>
-
-
-
-  </section>
 
 
   <section class="card" id="ultimosRegistros">
@@ -72,20 +73,8 @@
 
 </main>
 
-<script type="module" src="firebase.js"></script>
 <script type="module" src="progreso.js"></script>
-<script>
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", async () => {
-      try {
-        const registro = await navigator.serviceWorker.register("/sw.js");
-        console.log("Service Worker activo:", registro.scope);
-      } catch (error) {
-        console.error("Error al registrar Service Worker:", error);
-      }
-    });
-  }
-</script>
-<script src="conexion.js"></script>
+<script src="conexion.js" defer></script>
+<script src="pwa.js" defer></script>
 </body>
 </html>

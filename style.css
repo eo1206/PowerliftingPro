@@ -562,3 +562,8 @@ button {
     transform: rotate(360deg);
   }
 }
+/* Ajustes de la versión optimizada */
+button:disabled { opacity: .6; cursor: not-allowed; }
+.progress-summary { display: grid; gap: 10px; color: #cbd5e1; }
+.exercise { overflow-wrap: anywhere; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; } }

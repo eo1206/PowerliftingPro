@@ -34,7 +34,7 @@ try {
 
 onAuthStateChanged(auth, (user) => {
   if (!user) {
-    window.location.replace("index.html");
+    if (navigator.onLine) window.location.replace("index.html");
     return;
   }
 
@@ -107,6 +107,7 @@ selectorRutina.addEventListener("change", () => {
 });
 
 function mostrarRutina(rutina) {
+  contenedorRutina.innerHTML = "<h2>Ejercicios</h2>";
   nombreRutinaActiva.textContent = rutina.nombre;
   estadoRutina.textContent = rutina.estado || "activa";
 

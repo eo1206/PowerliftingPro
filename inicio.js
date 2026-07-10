@@ -1,421 +1,108 @@
 import { auth, db, authPreparado } from "./firebase.js";
-
-import {
-  collection,
-  addDoc,
-  query,
-  where,
-  orderBy,
-  onSnapshot,
-  getDocs,
-  deleteDoc,
-  doc,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-
-import {
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+import { collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+import { calcular1RM, escaparHTML, fechaLocal, numeroValido } from "./utils.js";
 
 const form = document.getElementById("trainingForm");
 const lista = document.getElementById("listaRegistros");
-
-const prSentadillaElemento = document.getElementById("prSentadilla");
-const prBancaElemento = document.getElementById("prBanca");
-const prMuertoElemento = document.getElementById("prMuerto");
+const prs = {
+  "Sentadilla": document.getElementById("prSentadilla"),
+  "Press banca": document.getElementById("prBanca"),
+  "Peso muerto": document.getElementById("prMuerto")
+};
 
 let usuarioActual = null;
 let cancelarEscucha = null;
+let registros = [];
 
-/* Esperar que Firebase restaure la sesión guardada */
+await authPreparado.catch((error) => console.error("No se pudo restaurar la sesión:", error));
 
-try {
-  await authPreparado;
-} catch (error) {
-  console.error("No se pudo restaurar la sesión:", error);
-}
+onAuthStateChanged(auth, (user) => {
+  usuarioActual = user;
+  cancelarEscucha?.();
+  cancelarEscucha = null;
 
-/* Detectar al usuario */
-
-onAuthStateChanged(auth, async (user) => {
   if (!user) {
-    usuarioActual = null;
-
-    if (cancelarEscucha) {
-      cancelarEscucha();
-      cancelarEscucha = null;
-    }
-
+    registros = [];
+    renderizar();
     return;
   }
 
-  usuarioActual = user;
-
-  await cargarRegistros(user.uid);
-  await actualizarPRs();
+  const consulta = query(collection(db, "usuarios", user.uid, "registros"), orderBy("creado", "desc"));
+  cancelarEscucha = onSnapshot(consulta, { includeMetadataChanges: true }, (snapshot) => {
+    registros = snapshot.docs.map((documento) => ({ id: documento.id, ...documento.data() }));
+    renderizar();
+  }, (error) => {
+    console.error("No se pudieron escuchar los registros:", error);
+    lista.innerHTML = '<h2>Últimos registros</h2><p class="empty">No se pudieron cargar los registros.</p>';
+  });
 });
 
-/* Calcular 1RM estimado mediante Brzycki */
+form?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (!usuarioActual) return alert("Primero inicia sesión");
 
-function calcular1RM(peso, reps) {
-  if (reps === 1) {
-    return Number(peso.toFixed(1));
-  }
+  const ejercicio = document.getElementById("exercise").value;
+  const peso = numeroValido(document.getElementById("peso").value);
+  const reps = numeroValido(document.getElementById("reps").value, { maximo: 36 });
+  const series = numeroValido(document.getElementById("series").value);
+  const rpe = Number(document.getElementById("rpe").value) || 0;
+  const notas = document.getElementById("notas").value.trim();
 
-  if (reps >= 37) {
-    return 0;
-  }
-
-  const resultado = (peso * 36) / (37 - reps);
-
-  return Number(resultado.toFixed(1));
-}
-
-/* Buscar el máximo 1RM de un ejercicio */
-
-async function obtenerMaximoPorEjercicio(ejercicioBuscado) {
-  if (!usuarioActual) {
-    return 0;
-  }
-
-  const consulta = query(
-    collection(
-      db,
-      "usuarios",
-      usuarioActual.uid,
-      "registros"
-    ),
-    where("ejercicio", "==", ejercicioBuscado)
-  );
+  if (!peso || !reps || !series) return alert("Completa peso, reps y series con valores válidos");
+  if (rpe < 0 || rpe > 10) return alert("El RPE debe estar entre 0 y 10");
 
   try {
-    const resultados = await getDocs(consulta);
-
-    let maximo = 0;
-
-    resultados.forEach((documento) => {
-      const datos = documento.data();
-      const valor = Number(datos.maxpeso) || 0;
-
-      if (valor > maximo) {
-        maximo = valor;
-      }
+    await addDoc(collection(db, "usuarios", usuarioActual.uid, "registros"), {
+      ejercicio, peso, reps, series, rpe, notas,
+      volumen: peso * reps * series,
+      maxpeso: calcular1RM(peso, reps),
+      fecha: fechaLocal(),
+      creado: serverTimestamp()
     });
-
-    return maximo;
-  } catch (error) {
-    console.error(
-      `No se pudo obtener el máximo de ${ejercicioBuscado}:`,
-      error
-    );
-
-    return 0;
-  }
-}
-
-/* Mostrar los tres PR en el HTML */
-
-async function actualizarPRs() {
-  if (!usuarioActual) {
-    return;
-  }
-
-  try {
-    const [
-      maxSentadilla,
-      maxBanca,
-      maxMuerto
-    ] = await Promise.all([
-      obtenerMaximoPorEjercicio("Sentadilla"),
-      obtenerMaximoPorEjercicio("Press banca"),
-      obtenerMaximoPorEjercicio("Peso muerto")
-    ]);
-
-    if (prSentadillaElemento) {
-      prSentadillaElemento.textContent =
-        maxSentadilla.toFixed(1);
-    }
-
-    if (prBancaElemento) {
-      prBancaElemento.textContent =
-        maxBanca.toFixed(1);
-    }
-
-    if (prMuertoElemento) {
-      prMuertoElemento.textContent =
-        maxMuerto.toFixed(1);
-    }
-  } catch (error) {
-    console.error("No se pudieron actualizar los PR:", error);
-  }
-}
-
-/* Guardar un entrenamiento */
-
-form?.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  if (!usuarioActual) {
-    alert("Primero inicia sesión");
-    return;
-  }
-
-  const ejercicio =
-    document.getElementById("exercise").value;
-
-  const peso =
-    Number(document.getElementById("peso").value);
-
-  const reps =
-    Number(document.getElementById("reps").value);
-
-  const series =
-    Number(document.getElementById("series").value);
-
-  const rpe =
-    Number(document.getElementById("rpe").value) || 0;
-
-  const notas =
-    document.getElementById("notas").value.trim();
-
-  if (peso <= 0 || reps <= 0 || series <= 0) {
-    alert("Completa peso, reps y series con valores válidos");
-    return;
-  }
-
-  if (reps >= 37) {
-    alert("Las repeticiones deben ser menores de 37");
-    return;
-  }
-
-  const maxpeso = calcular1RM(peso, reps);
-  const volumen = peso * reps * series;
-
-  try {
-    const maximoAnterior =
-      await obtenerMaximoPorEjercicio(ejercicio);
-
-    const esPR = maxpeso > maximoAnterior;
-
-    await addDoc(
-      collection(
-        db,
-        "usuarios",
-        usuarioActual.uid,
-        "registros"
-      ),
-      {
-        ejercicio,
-        peso,
-        reps,
-        series,
-        rpe,
-        notas,
-        volumen,
-        maxpeso,
-        esPR,
-        fecha: new Date().toLocaleDateString("es-MX"),
-        creado: serverTimestamp()
-      }
-    );
-
     form.reset();
-
-    await actualizarPRs();
   } catch (error) {
     console.error("No se pudo guardar el registro:", error);
-
-    alert(
-      `${error.code || "Error"}: ${error.message}`
-    );
+    alert("No se pudo guardar el registro");
   }
 });
 
-/* Leer registros al abrir y escuchar cambios */
+lista?.addEventListener("click", async (event) => {
+  const boton = event.target.closest(".delete");
+  if (!boton || !usuarioActual || !confirm("¿Quieres eliminar este registro?")) return;
+  try {
+    await deleteDoc(doc(db, "usuarios", usuarioActual.uid, "registros", boton.dataset.id));
+  } catch (error) {
+    console.error(error);
+    alert("No se pudo eliminar el registro");
+  }
+});
 
-async function cargarRegistros(uid) {
-  if (!lista) {
-    console.error(
-      "No existe el elemento #listaRegistros en el HTML"
-    );
+function renderizar() {
+  actualizarPRs();
+  if (!lista) return;
+  if (!registros.length) {
+    lista.innerHTML = '<h2>Últimos registros</h2><p class="empty">Todavía no hay registros.</p>';
     return;
   }
 
-  if (cancelarEscucha) {
-    cancelarEscucha();
-    cancelarEscucha = null;
-  }
-
-  const consulta = query(
-    collection(db, "usuarios", uid, "registros"),
-    orderBy("creado", "desc")
-  );
-
-  try {
-    /*
-      Lectura inicial para mostrar los registros
-      inmediatamente al abrir la aplicación.
-    */
-
-    const snapshotInicial = await getDocs(consulta);
-
-    mostrarRegistros(snapshotInicial, uid);
-
-    /*
-      Escuchar nuevos registros, eliminaciones
-      o modificaciones en tiempo real.
-    */
-
-    cancelarEscucha = onSnapshot(
-      consulta,
-
-      async (snapshot) => {
-        mostrarRegistros(snapshot, uid);
-        await actualizarPRs();
-      },
-
-      (error) => {
-        console.error(
-          "Error al escuchar registros:",
-          error
-        );
-      }
-    );
-  } catch (error) {
-    console.error("Error al cargar registros:", error);
-
-    lista.innerHTML = `
-      <h2>Últimos registros</h2>
-      <p class="empty">
-        No se pudieron cargar los registros.
-      </p>
-    `;
-  }
+  lista.innerHTML = `<h2>Últimos registros</h2>${registros.slice(0, 20).map((r) => `
+    <article class="exercise">
+      <div>
+        <h3>${escaparHTML(r.ejercicio || "Ejercicio")}</h3>
+        <p>${Number(r.series) || 0} series · ${Number(r.reps) || 0} reps · ${Number(r.peso) || 0} kg</p>
+        <p>1RM estimado: ${Number(r.maxpeso || calcular1RM(r.peso, r.reps)).toFixed(1)} kg</p>
+        <p>Volumen: ${Number(r.volumen) || 0} kg · ${escaparHTML(r.fecha || "")}</p>
+        ${r.notas ? `<p>Nota: ${escaparHTML(r.notas)}</p>` : ""}
+      </div>
+      <div class="right"><span>RPE ${Number(r.rpe) || "-"}</span><button class="delete" data-id="${r.id}" type="button" aria-label="Eliminar registro">×</button></div>
+    </article>`).join("")}`;
 }
 
-/* Dibujar registros en el HTML */
-
-function mostrarRegistros(snapshot, uid) {
-  if (!lista) {
-    return;
+function actualizarPRs() {
+  const maximos = { "Sentadilla": 0, "Press banca": 0, "Peso muerto": 0 };
+  for (const r of registros) {
+    if (r.ejercicio in maximos) maximos[r.ejercicio] = Math.max(maximos[r.ejercicio], Number(r.maxpeso) || calcular1RM(r.peso, r.reps));
   }
-
-  lista.innerHTML = "<h2>Últimos registros</h2>";
-
-  if (snapshot.empty) {
-    lista.innerHTML += `
-      <p class="empty">
-        Todavía no hay registros.
-      </p>
-    `;
-
-    return;
-  }
-
-  snapshot.forEach((documento) => {
-    const r = documento.data();
-
-    const maxpesoMostrar =
-      Number(r.maxpeso || 0).toFixed(1);
-
-    const volumenMostrar =
-      Number(r.volumen || 0).toFixed(1);
-
-    lista.innerHTML += `
-      <div class="exercise">
-        <div>
-          <h3>
-            ${r.ejercicio || "Ejercicio"}
-            ${r.esPR ? "🏆" : ""}
-          </h3>
-
-          <p>
-            ${Number(r.series) || 0} series ·
-            ${Number(r.reps) || 0} reps ·
-            ${Number(r.peso) || 0} kg
-          </p>
-
-          <p>
-            1RM estimado:
-            ${maxpesoMostrar} kg
-          </p>
-
-          <p>
-            ${
-              r.esPR
-                ? "🏆 Nuevo PR"
-                : "No es PR"
-            }
-          </p>
-
-          <p>
-            Volumen:
-            ${volumenMostrar} kg ·
-            ${r.fecha || ""}
-          </p>
-
-          ${
-            r.notas
-              ? `<p>Nota: ${r.notas}</p>`
-              : ""
-          }
-        </div>
-
-        <div class="right">
-          <span>
-            RPE ${Number(r.rpe) || "-"}
-          </span>
-
-          <button
-            class="delete"
-            data-id="${documento.id}"
-            type="button"
-            aria-label="Eliminar registro"
-          >
-            ×
-          </button>
-        </div>
-      </div>
-    `;
-  });
-
-  /* Asignar eventos a los botones de eliminar */
-
-  lista.querySelectorAll(".delete").forEach((boton) => {
-    boton.addEventListener("click", async () => {
-      const idRegistro = boton.dataset.id;
-
-      const confirmar = confirm(
-        "¿Quieres eliminar este registro?"
-      );
-
-      if (!confirmar) {
-        return;
-      }
-
-      try {
-        await deleteDoc(
-          doc(
-            db,
-            "usuarios",
-            uid,
-            "registros",
-            idRegistro
-          )
-        );
-
-        /*
-          onSnapshot actualiza automáticamente
-          la lista y los PR después de eliminar.
-        */
-      } catch (error) {
-        console.error(
-          "No se pudo eliminar el registro:",
-          error
-        );
-
-        alert("No se pudo eliminar el registro");
-      }
-    });
-  });
+  for (const [ejercicio, elemento] of Object.entries(prs)) if (elemento) elemento.textContent = maximos[ejercicio].toFixed(1);
 }
