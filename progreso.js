@@ -44,6 +44,13 @@ function normalizarRutina(id, sesion) {
   });
 }
 
+const pesoTotal =
+    prSentadilla +
+    prBanca +
+    prMuerto;
+
+document.getElementById("pesoTotal").textContent = pesoTotal + " kg";
+
 function tiempo(r) {
   if (r.creado?.toMillis) return r.creado.toMillis();
   if (r.creado?.seconds) return r.creado.seconds * 1000;
