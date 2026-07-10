@@ -1,13 +1,11 @@
 import { auth, db, authPreparado } from "./firebase.js";
-
 import {
   collection,
   addDoc,
   query,
-  where,
-  getDocs,
   orderBy,
   onSnapshot,
+  getDocs,
   deleteDoc,
   doc,
   serverTimestamp
@@ -114,51 +112,37 @@ form.addEventListener("submit", async (e) => {
   form.reset();
   await actualizarPRs();
 });
-
-function cargarRegistros(uid) {
-  if (cancelarEscucha) cancelarEscucha();
+async function cargarRegistros(uid) {
+  if (cancelarEscucha) {
+    cancelarEscucha();
+  }
 
   const consulta = query(
     collection(db, "usuarios", uid, "registros"),
     orderBy("creado", "desc")
   );
 
-  cancelarEscucha = onSnapshot(consulta, (snapshot) => {
-    lista.innerHTML = "<h2>Últimos registros</h2>";
+  try {
+    // Primera lectura al abrir la aplicación
+    const snapshotInicial = await getDocs(consulta);
+    mostrarRegistros(snapshotInicial, uid);
 
-    if (snapshot.empty) {
-      lista.innerHTML += `<p class="empty">Todavía no hay registros.</p>`;
-      return;
-    }
+    // Después se queda escuchando cambios
+    cancelarEscucha = onSnapshot(
+      consulta,
+      (snapshot) => {
+        mostrarRegistros(snapshot, uid);
+      },
+      (error) => {
+        console.error("Error al escuchar registros:", error);
+      }
+    );
+  } catch (error) {
+    console.error("Error al cargar registros:", error);
 
-    snapshot.forEach((documento) => {
-      const r = documento.data();
-      const maxpesoMostrar = Number(r.maxpeso || 0).toFixed(1);
-
-      lista.innerHTML += `
-        <div class="exercise">
-          <div>
-            <h3>${r.ejercicio}</h3>
-            <p>${r.series} series · ${r.reps} reps · ${r.peso} kg</p>
-            <p>1RM estimado: ${maxpesoMostrar} kg</p>
-            <p>${r.esPR ? "Nuevo PR" : "No es PR"}</p>
-            <p>Volumen: ${r.volumen} kg · ${r.fecha}</p>
-            ${r.notas ? `<p>Nota: ${r.notas}</p>` : ""}
-          </div>
-
-          <div class="right">
-            <span>RPE ${r.rpe || "-"}</span>
-            <button class="delete" data-id="${documento.id}">×</button>
-          </div>
-        </div>
-      `;
-    });
-
-    document.querySelectorAll(".delete").forEach((boton) => {
-      boton.addEventListener("click", async () => {
-        await deleteDoc(doc(db, "usuarios", uid, "registros", boton.dataset.id));
-        await actualizarPRs();
-      });
-    });
-  });
+    lista.innerHTML = `
+      <h2>Últimos registros</h2>
+      <p class="empty">No se pudieron cargar los registros.</p>
+    `;
+  }
 }

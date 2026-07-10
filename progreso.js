@@ -54,17 +54,13 @@ ejercicioGrafica?.addEventListener("change", () => {
 });
 
 /* Esperar a que Firebase restaure la sesión guardada */
+let usuarioActual = null;
 
 try {
   await authPreparado;
 } catch (error) {
-  console.error(
-    "No se pudo preparar la sesión:",
-    error
-  );
+  console.error("No se pudo restaurar la sesión:", error);
 }
-
-/* Comprobar la sesión */
 
 onAuthStateChanged(auth, (user) => {
   if (!user) {
@@ -75,7 +71,6 @@ onAuthStateChanged(auth, (user) => {
   usuarioActual = user;
   cargarProgreso(user.uid);
 });
-
 /* Leer los registros de Firestore */
 
 function cargarProgreso(uid) {
