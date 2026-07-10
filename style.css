@@ -502,3 +502,34 @@ button {
 .app {
   padding-bottom: 110px;
 }
+
+.estado-conexion {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+
+  padding: 9px 16px;
+  border-radius: 20px;
+
+  background: #f59e0b;
+  color: #0f172a;
+
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.estado-conexion.online {
+  background: #22c55e;
+  color: white;
+}
+
+.estado-conexion.offline {
+  background: #f59e0b;
+  color: #0f172a;
+}
+
+.hidden {
+  display: none !important;
+}

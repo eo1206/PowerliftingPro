@@ -120,3 +120,25 @@ onAuthStateChanged(auth, async (user) => {
     appScreen.classList.add("hidden");
   }
 });
+
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    authScreen.classList.add("hidden");
+    appScreen.classList.remove("hidden");
+
+    try {
+      const documento = await getDoc(
+        doc(db, "usuarios", user.uid)
+      );
+
+      if (documento.exists()) {
+        nombreUsuario.textContent = documento.data().nombre;
+      }
+    } catch (error) {
+      console.warn("No se pudo consultar el perfil:", error);
+    }
+  } else {
+    authScreen.classList.remove("hidden");
+    appScreen.classList.add("hidden");
+  }
+});

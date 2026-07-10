@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
+<div id="estadoConexion" class="estado-conexion hidden"></div>
 <main class="app">
 
   <header class="header">
@@ -58,6 +58,18 @@
 
 <script type="module" src="firebase.js"></script>
 <script type="module" src="rutinas.js"></script>
-
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", async () => {
+      try {
+        const registro = await navigator.serviceWorker.register("/sw.js");
+        console.log("Service Worker activo:", registro.scope);
+      } catch (error) {
+        console.error("Error al registrar Service Worker:", error);
+      }
+    });
+  }
+</script>
+<script src="conexion.js"></script>
 </body>
 </html>
