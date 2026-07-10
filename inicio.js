@@ -118,5 +118,9 @@ function renderizar() {
   }).join("")}`;
 }
 
-const pesoTotal = Muerto + Banca + Sentadilla;
+const pesoTotal =
+  maximos["Sentadilla"] +
+  maximos["Press banca"] +
+  maximos["Peso muerto"];
+  
 document.getElementById("pesoTotal").textContent = pesoTotal.toFixed(1);
