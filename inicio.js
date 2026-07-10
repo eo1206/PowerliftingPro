@@ -118,4 +118,4 @@ function renderizar() {
   }).join("")}`;
 }
 
-let pesototal = prMuerto + prBanca + prSentadilla;
+let pesoTotal = prMuerto + prBanca + prSentadilla;
