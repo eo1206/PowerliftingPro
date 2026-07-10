@@ -13,11 +13,6 @@ let normales = [];
 let rutinas = [];
 let cancelarNormales = null;
 let cancelarRutinas = null;
-let total = prSentadilla +
-  prBanca +
-  prMuerto;
-
-
 
 await authPreparado.catch(console.error);
 onAuthStateChanged(auth, (user) => {
