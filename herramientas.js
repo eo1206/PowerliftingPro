@@ -5,6 +5,27 @@ const calcularPeso = document.getElementById("calcularPeso");
 const calcular1RM = document.getElementById("calcular1RM");
 const calcularGL = document.getElementById("calcularGL");
 
+
+
+import { auth, authPreparado } from "./firebase.js";
+
+import {
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+try {
+  await authPreparado;
+} catch (error) {
+  console.error("No se pudo restaurar la sesión:", error);
+}
+
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    window.location.replace("index.html");
+  }
+});
+
+
 function obtenerDiscosDisponibles() {
   return Array.from(discosCheckbox)
     .filter(disco => disco.checked)

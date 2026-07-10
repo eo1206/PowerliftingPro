@@ -1,4 +1,4 @@
-import { auth, db } from "./firebase.js";
+import { auth, db, authPreparado } from "./firebase.js";
 
 import {
   collection,
@@ -25,13 +25,21 @@ let rutinaActualId = null;
 let rutinaActual = null;
 let ejerciciosCompletados = [];
 
+
+try {
+  await authPreparado;
+} catch (error) {
+  console.error("No se pudo restaurar la sesión:", error);
+}
+
 onAuthStateChanged(auth, (user) => {
   if (!user) {
-    window.location.href = "index.html";
+    window.location.replace("index.html");
     return;
   }
 
   usuarioActual = user;
+
   cargarRutinas();
   cargarHistorialRutina();
 });

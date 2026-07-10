@@ -1,4 +1,4 @@
-import { auth, db } from "./firebase.js";
+import { auth, db, authPreparado } from "./firebase.js";
 
 import {
   collection,
@@ -23,15 +23,21 @@ const lista = document.getElementById("listaRegistros");
 let usuarioActual = null;
 let cancelarEscucha = null;
 
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-  usuarioActual = null;
-  return;
+
+try {
+  await authPreparado;
+} catch (error) {
+  console.error("No se pudo restaurar la sesión:", error);
 }
+
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    usuarioActual = null;
+    return;
+  }
 
   usuarioActual = user;
   cargarRegistros(user.uid);
-  await actualizarPRs();
 });
 
 function calcular1RM(peso, reps) {

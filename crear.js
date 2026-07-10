@@ -1,4 +1,4 @@
-import { auth, db } from "./firebase.js";
+import { auth, db, authPreparado } from "./firebase.js";
 
 import {
   collection,
@@ -22,10 +22,16 @@ const vistaRutina = document.getElementById("vistaRutina");
 let usuarioActual = null;
 let ejerciciosRutina = [];
 
+
+try {
+  await authPreparado;
+} catch (error) {
+  console.error("No se pudo restaurar la sesión:", error);
+}
+
 onAuthStateChanged(auth, (user) => {
   if (!user) {
-    alert("Primero inicia sesión");
-    window.location.href = "index.html";
+    window.location.replace("index.html");
     return;
   }
 
