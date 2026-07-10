@@ -6,7 +6,7 @@ import { calcular1RM, escaparHTML } from "./utils.js";
 const ui = {
   app: document.getElementById("appProtegida"), loading: document.getElementById("loadingScreen"),
   sentadilla: document.getElementById("prSentadilla"), banca: document.getElementById("prBanca"), muerto: document.getElementById("prMuerto"),
-  total: document.getElementById("totalEntrenamientos"), volumen: document.getElementById("volumenTotal"),
+  total: document.getElementById("totalEntrenamientos"), pesoTotal: document.getElementById("pesoTotal"),
   lista: document.getElementById("ultimosRegistros"), ejercicio: document.getElementById("ejercicioGrafica"),
   canvas: document.getElementById("graficaMaximos"), detalle: document.getElementById("detallePunto"), tabla: document.getElementById("tablaProgreso")
 };
@@ -77,16 +77,21 @@ ui.canvas.addEventListener("click", (event) => {
 function renderizar() {
   const datos = combinar();
   const maximos = { "Sentadilla": 0, "Press banca": 0, "Peso muerto": 0 };
-  let volumen = 0;
   for (const r of datos) {
-    volumen += r.volumen || 0;
-    if (r.ejercicio in maximos) maximos[r.ejercicio] = Math.max(maximos[r.ejercicio], r.maxpeso || 0);
+    if (r.ejercicio in maximos) {
+      maximos[r.ejercicio] = Math.max(maximos[r.ejercicio], Number(r.maxpeso) || 0);
+    }
   }
+
+  const pesoTotal =
+    maximos["Sentadilla"] +
+    maximos["Press banca"] +
+    maximos["Peso muerto"];
   ui.sentadilla.textContent = maximos["Sentadilla"].toFixed(1);
   ui.banca.textContent = maximos["Press banca"].toFixed(1);
   ui.muerto.textContent = maximos["Peso muerto"].toFixed(1);
   ui.total.textContent = String(datos.length);
-  ui.volumen.textContent = `${volumen.toFixed(1)} kg`;
+  ui.pesoTotal.textContent = `${pesoTotal.toFixed(1)} kg`;
 
   ui.lista.innerHTML = `<h2>Últimos registros</h2>${datos.length ? datos.slice(0, 10).map((r) => `<article class="exercise"><div><h3>${escaparHTML(r.ejercicio)}</h3><p>${r.series} series · ${r.reps} reps · ${r.peso} kg</p><p>1RM estimado: ${r.maxpeso.toFixed(1)} kg</p><p>${fechaVisible(r)}</p></div></article>`).join("") : '<p class="empty">Todavía no hay registros.</p>'}`;
 

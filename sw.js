@@ -1,4 +1,4 @@
-const CACHE_NAME = "powerlog-v6";
+const CACHE_NAME = "powerlog-v7";
 
 const APP_SHELL = [
   "./",
@@ -8,7 +8,7 @@ const APP_SHELL = [
   "./rutina.html",
   "./progreso.html",
   "./Herramientas.html",
-  "./style.css?v=6",
+  "./style.css?v=7",
   "./firebase.js",
   "./auth.js",
   "./inicio.js",
