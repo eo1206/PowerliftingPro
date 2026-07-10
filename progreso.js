@@ -6,10 +6,18 @@ import { calcular1RM, escaparHTML } from "./utils.js";
 const ui = {
   app: document.getElementById("appProtegida"), loading: document.getElementById("loadingScreen"),
   sentadilla: document.getElementById("prSentadilla"), banca: document.getElementById("prBanca"), muerto: document.getElementById("prMuerto"),
-  total: document.getElementById("totalEntrenamientos"), volumen: document.getElementById("volumenTotal"),
+  total: document.getElementById("totalEntrenamientos"), volumen: document.getElementById("volumenTotal"), peso: document.getElementById("pesoTotal"),
   lista: document.getElementById("ultimosRegistros"), ejercicio: document.getElementById("ejercicioGrafica"),
   canvas: document.getElementById("graficaMaximos"), detalle: document.getElementById("detallePunto"), tabla: document.getElementById("tablaProgreso")
 };
+
+const pesoTotal =
+    prSentadilla +
+    prBanca +
+    prMuerto;
+
+document.getElementById("pesoTotal").textContent = pesoTotal + " kg";
+
 
 let normales = [], rutinas = [], puntosCanvas = [];
 let cancelarNormales, cancelarRutinas;
@@ -44,12 +52,7 @@ function normalizarRutina(id, sesion) {
   });
 }
 
-const pesoTotal =
-    prSentadilla +
-    prBanca +
-    prMuerto;
 
-document.getElementById("pesoTotal").textContent = pesoTotal + " kg";
 
 function tiempo(r) {
   if (r.creado?.toMillis) return r.creado.toMillis();
