@@ -1,13 +1,11 @@
 import {
   initializeApp
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-
 import {
-  getAuth,
-  setPersistence,
+  initializeAuth,
+  indexedDBLocalPersistence,
   browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-
 import {
   initializeFirestore,
   persistentLocalCache,
@@ -25,13 +23,14 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+export const auth = initializeAuth(app, {
+  persistence: [
+    indexedDBLocalPersistence,
+    browserLocalPersistence
+  ]
+});
 
-export const auth = getAuth(app);
-
-export const authPreparado = setPersistence(
-  auth,
-  browserLocalPersistence
-);
+export const authPreparado = auth.authStateReady();
 
 export const db = initializeFirestore(app, {
   localCache: persistentLocalCache({
