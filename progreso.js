@@ -11,6 +11,10 @@ import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
+/* =========================
+   ELEMENTOS DEL HTML
+========================= */
+
 const prSentadilla = document.getElementById("prSentadilla");
 const prBanca = document.getElementById("prBanca");
 const prMuerto = document.getElementById("prMuerto");
@@ -43,18 +47,30 @@ const ctx = canvasGrafica
   ? canvasGrafica.getContext("2d")
   : null;
 
-let registrosGlobales = [];
-let usuarioActual = null;
-let cancelarEscucha = null;
+/* =========================
+   VARIABLES
+========================= */
 
-/* Cambiar la gráfica al seleccionar otro ejercicio */
+let usuarioActual = null;
+
+let registrosNormales = [];
+let registrosRutina = [];
+let registrosGlobales = [];
+
+let cancelarRegistros = null;
+let cancelarRutinas = null;
+
+/* =========================
+   CAMBIAR GRÁFICA
+========================= */
 
 ejercicioGrafica?.addEventListener("change", () => {
   dibujarGraficaMaximos(ejercicioGrafica.value);
 });
 
-/* Esperar a que Firebase restaure la sesión guardada */
-
+/* =========================
+   RESTAURAR SESIÓN
+========================= */
 
 try {
   await authPreparado;
@@ -69,13 +85,18 @@ onAuthStateChanged(auth, (user) => {
   }
 
   usuarioActual = user;
-  cargarProgreso(user.uid);
-});
-/* Leer los registros de Firestore */
 
-function cargarProgreso(uid) {
-  if (cancelarEscucha) {
-    cancelarEscucha();
+  escucharRegistrosNormales(user.uid);
+  escucharRegistrosRutina(user.uid);
+});
+
+/* =========================
+   LEER REGISTROS DE INICIO
+========================= */
+
+function escucharRegistrosNormales(uid) {
+  if (cancelarRegistros) {
+    cancelarRegistros();
   }
 
   const consulta = query(
@@ -83,152 +104,268 @@ function cargarProgreso(uid) {
     orderBy("creado", "desc")
   );
 
-  cancelarEscucha = onSnapshot(
+  cancelarRegistros = onSnapshot(
     consulta,
 
     (snapshot) => {
-      let mejorSentadilla = 0;
-      let mejorBanca = 0;
-      let mejorMuerto = 0;
-
-      let volumenGeneral = 0;
-      let volumenSentadilla = 0;
-      let volumenBanca = 0;
-      let volumenMuerto = 0;
-
-      let cantidadRegistros = 0;
-
-      registrosGlobales = [];
-
-      ultimosRegistros.innerHTML =
-        "<h2>Últimos registros</h2>";
-
-      if (snapshot.empty) {
-        limpiarValores();
-
-        ultimosRegistros.innerHTML += `
-          <p class="empty">
-            Todavía no hay registros.
-          </p>
-        `;
-
-        dibujarGraficaMaximos(
-          ejercicioGrafica?.value || "Sentadilla"
-        );
-
-        return;
-      }
+      registrosNormales = [];
 
       snapshot.forEach((documento) => {
         const r = documento.data();
 
-        registrosGlobales.push(r);
-
-        cantidadRegistros++;
-
-        const volumen = Number(r.volumen) || 0;
-        const maxpeso = Number(r.maxpeso) || 0;
-
-        volumenGeneral += volumen;
-
-        if (r.ejercicio === "Sentadilla") {
-          volumenSentadilla += volumen;
-
-          if (maxpeso > mejorSentadilla) {
-            mejorSentadilla = maxpeso;
-          }
-        }
-
-        if (r.ejercicio === "Press banca") {
-          volumenBanca += volumen;
-
-          if (maxpeso > mejorBanca) {
-            mejorBanca = maxpeso;
-          }
-        }
-
-        if (r.ejercicio === "Peso muerto") {
-          volumenMuerto += volumen;
-
-          if (maxpeso > mejorMuerto) {
-            mejorMuerto = maxpeso;
-          }
-        }
-
-        if (cantidadRegistros <= 8) {
-          ultimosRegistros.innerHTML += `
-            <div class="exercise">
-              <div>
-                <h3>${r.ejercicio || "Ejercicio"}</h3>
-
-                <p>
-                  ${Number(r.series) || 0} series ·
-                  ${Number(r.reps) || 0} reps ·
-                  ${Number(r.peso) || 0} kg
-                </p>
-
-                <p>
-                  1RM estimado:
-                  ${maxpeso.toFixed(1)} kg
-                </p>
-
-                <p>
-                  Volumen:
-                  ${volumen.toFixed(1)} kg ·
-                  ${r.fecha || ""}
-                </p>
-              </div>
-            </div>
-          `;
-        }
+        registrosNormales.push({
+          id: documento.id,
+          origen: "registro",
+          ejercicio: r.ejercicio || "",
+          peso: Number(r.peso) || 0,
+          reps: Number(r.reps) || 0,
+          series: Number(r.series) || 0,
+          rpe: Number(r.rpe) || 0,
+          volumen: Number(r.volumen) || 0,
+          maxpeso: Number(r.maxpeso) || 0,
+          fecha: r.fecha || "",
+          creado: r.creado || null
+        });
       });
 
-      prSentadilla.textContent =
-        mejorSentadilla.toFixed(1);
-
-      prBanca.textContent =
-        mejorBanca.toFixed(1);
-
-      prMuerto.textContent =
-        mejorMuerto.toFixed(1);
-
-      totalEntrenamientos.textContent =
-        `${cantidadRegistros} registros`;
-
-      volumenTotal.textContent =
-        `${volumenGeneral.toFixed(1)} kg`;
-
-      volSentadilla.textContent =
-        `${volumenSentadilla.toFixed(1)} kg`;
-
-      volBanca.textContent =
-        `${volumenBanca.toFixed(1)} kg`;
-
-      volMuerto.textContent =
-        `${volumenMuerto.toFixed(1)} kg`;
-
-      dibujarGraficaMaximos(
-        ejercicioGrafica?.value || "Sentadilla"
-      );
+      combinarYMostrar();
     },
 
     (error) => {
-      console.error(
-        "Error al cargar el progreso:",
-        error
-      );
-
-      ultimosRegistros.innerHTML = `
-        <h2>Últimos registros</h2>
-        <p class="empty">
-          No se pudieron cargar los registros.
-        </p>
-      `;
+      console.error("Error al leer registros normales:", error);
     }
   );
 }
 
-/* Reiniciar datos cuando no hay registros */
+/* =========================
+   LEER REGISTROS DE RUTINA
+========================= */
+
+function escucharRegistrosRutina(uid) {
+  if (cancelarRutinas) {
+    cancelarRutinas();
+  }
+
+  const consulta = query(
+    collection(db, "usuarios", uid, "registrosRutina"),
+    orderBy("creado", "desc")
+  );
+
+  cancelarRutinas = onSnapshot(
+    consulta,
+
+    (snapshot) => {
+      registrosRutina = [];
+
+      snapshot.forEach((documento) => {
+        const sesion = documento.data();
+
+        const ejercicios = Array.isArray(sesion.ejercicios)
+          ? sesion.ejercicios
+          : [];
+
+        ejercicios.forEach((ejercicio, index) => {
+          const peso = Number(ejercicio.pesoReal) || 0;
+          const reps = Number(ejercicio.repsReal) || 0;
+
+          const series =
+            Number(ejercicio.seriesReal) ||
+            Number(ejercicio.seriesObjetivo) ||
+            1;
+
+          const volumen = peso * reps * series;
+
+          registrosRutina.push({
+            id: `${documento.id}-${index}`,
+            origen: "rutina",
+            nombreRutina: sesion.nombreRutina || "Rutina",
+            ejercicio: ejercicio.ejercicio || "",
+            peso,
+            reps,
+            series,
+            rpe: Number(ejercicio.rpeReal) || 0,
+            volumen,
+            maxpeso: calcular1RM(peso, reps),
+            fecha: sesion.fecha || "",
+            creado: sesion.creado || null
+          });
+        });
+      });
+
+      combinarYMostrar();
+    },
+
+    (error) => {
+      console.error("Error al leer registros de rutina:", error);
+    }
+  );
+}
+
+/* =========================
+   COMBINAR COLECCIONES
+========================= */
+
+function combinarYMostrar() {
+  registrosGlobales = [
+    ...registrosNormales,
+    ...registrosRutina
+  ].sort((a, b) => obtenerTiempo(b) - obtenerTiempo(a));
+
+  mostrarProgreso();
+}
+
+/* =========================
+   CALCULAR Y MOSTRAR PROGRESO
+========================= */
+
+function mostrarProgreso() {
+  let mejorSentadilla = 0;
+  let mejorBanca = 0;
+  let mejorMuerto = 0;
+
+  let volumenGeneral = 0;
+  let volumenSentadilla = 0;
+  let volumenBanca = 0;
+  let volumenMuerto = 0;
+
+  ultimosRegistros.innerHTML =
+    "<h2>Últimos registros</h2>";
+
+  if (registrosGlobales.length === 0) {
+    limpiarValores();
+
+    ultimosRegistros.innerHTML += `
+      <p class="empty">
+        Todavía no hay registros.
+      </p>
+    `;
+
+    dibujarGraficaMaximos(
+      ejercicioGrafica?.value || "Sentadilla"
+    );
+
+    return;
+  }
+
+  registrosGlobales.forEach((r) => {
+    const volumen = Number(r.volumen) || 0;
+    const maxpeso = Number(r.maxpeso) || 0;
+
+    volumenGeneral += volumen;
+
+    if (r.ejercicio === "Sentadilla") {
+      volumenSentadilla += volumen;
+
+      if (maxpeso > mejorSentadilla) {
+        mejorSentadilla = maxpeso;
+      }
+    }
+
+    if (r.ejercicio === "Press banca") {
+      volumenBanca += volumen;
+
+      if (maxpeso > mejorBanca) {
+        mejorBanca = maxpeso;
+      }
+    }
+
+    if (r.ejercicio === "Peso muerto") {
+      volumenMuerto += volumen;
+
+      if (maxpeso > mejorMuerto) {
+        mejorMuerto = maxpeso;
+      }
+    }
+  });
+
+  registrosGlobales.slice(0, 8).forEach((r) => {
+    ultimosRegistros.innerHTML += `
+      <div class="exercise">
+        <div>
+          <h3>${r.ejercicio || "Ejercicio"}</h3>
+
+          <p>
+            ${r.series} series ·
+            ${r.reps} reps ·
+            ${r.peso} kg
+          </p>
+
+          <p>
+            1RM estimado:
+            ${Number(r.maxpeso).toFixed(1)} kg
+          </p>
+
+          <p>
+            Volumen:
+            ${Number(r.volumen).toFixed(1)} kg ·
+            ${r.fecha || ""}
+          </p>
+
+          ${
+            r.origen === "rutina"
+              ? `<p>Rutina: ${r.nombreRutina}</p>`
+              : ""
+          }
+        </div>
+      </div>
+    `;
+  });
+
+  prSentadilla.textContent =
+    mejorSentadilla.toFixed(1);
+
+  prBanca.textContent =
+    mejorBanca.toFixed(1);
+
+  prMuerto.textContent =
+    mejorMuerto.toFixed(1);
+
+  totalEntrenamientos.textContent =
+    `${registrosGlobales.length} registros`;
+
+  volumenTotal.textContent =
+    `${volumenGeneral.toFixed(1)} kg`;
+
+  volSentadilla.textContent =
+    `${volumenSentadilla.toFixed(1)} kg`;
+
+  volBanca.textContent =
+    `${volumenBanca.toFixed(1)} kg`;
+
+  volMuerto.textContent =
+    `${volumenMuerto.toFixed(1)} kg`;
+
+  dibujarGraficaMaximos(
+    ejercicioGrafica?.value || "Sentadilla"
+  );
+}
+
+/* =========================
+   CALCULAR 1RM
+========================= */
+
+function calcular1RM(peso, reps) {
+  if (peso <= 0 || reps <= 0) {
+    return 0;
+  }
+
+  if (reps === 1) {
+    return Number(peso.toFixed(1));
+  }
+
+  if (reps >= 37) {
+    return 0;
+  }
+
+  const resultado =
+    (peso * 36) / (37 - reps);
+
+  return Number(resultado.toFixed(1));
+}
+
+/* =========================
+   LIMPIAR VALORES
+========================= */
 
 function limpiarValores() {
   prSentadilla.textContent = "0.0";
@@ -249,11 +386,11 @@ function limpiarValores() {
 
   volMuerto.textContent =
     "0 kg";
-
-  registrosGlobales = [];
 }
 
-/* Dibujar gráfica manual */
+/* =========================
+   GRÁFICA
+========================= */
 
 function dibujarGraficaMaximos(ejercicioBuscado) {
   if (!ctx || !canvasGrafica) {
@@ -278,6 +415,15 @@ function dibujarGraficaMaximos(ejercicioBuscado) {
     canvasGrafica.height
   );
 
+  ctx.fillStyle = "#334155";
+
+  ctx.fillRect(
+    0,
+    0,
+    canvasGrafica.width,
+    canvasGrafica.height
+  );
+
   if (datos.length === 0) {
     ctx.fillStyle = "#94a3b8";
     ctx.font = "14px Arial";
@@ -295,7 +441,7 @@ function dibujarGraficaMaximos(ejercicioBuscado) {
 
   const paddingIzquierdo = 55;
   const paddingDerecho = 20;
-  const paddingSuperior = 25;
+  const paddingSuperior = 30;
   const paddingInferior = 45;
 
   const ancho =
@@ -315,33 +461,15 @@ function dibujarGraficaMaximos(ejercicioBuscado) {
   let minimo = Math.min(...valores);
   let maximo = Math.max(...valores);
 
-  /*
-    Se agrega margen para que la línea no quede
-    pegada arriba o abajo.
-  */
-
   const margen = Math.max(
     (maximo - minimo) * 0.15,
     5
   );
 
   minimo = Math.max(0, minimo - margen);
-  maximo = maximo + margen;
+  maximo += margen;
 
   const rango = maximo - minimo || 1;
-
-  /* Fondo */
-
-  ctx.fillStyle = "#334155";
-
-  ctx.fillRect(
-    0,
-    0,
-    canvasGrafica.width,
-    canvasGrafica.height
-  );
-
-  /* Líneas horizontales y valores del eje Y */
 
   ctx.font = "11px Arial";
   ctx.textAlign = "right";
@@ -351,26 +479,14 @@ function dibujarGraficaMaximos(ejercicioBuscado) {
 
   for (let i = 0; i <= divisiones; i++) {
     const porcentaje = i / divisiones;
-
-    const y =
-      paddingSuperior +
-      porcentaje * alto;
-
-    const valor =
-      maximo -
-      porcentaje * rango;
+    const y = paddingSuperior + porcentaje * alto;
+    const valor = maximo - porcentaje * rango;
 
     ctx.strokeStyle =
       "rgba(148, 163, 184, 0.18)";
 
-    ctx.lineWidth = 1;
-
     ctx.beginPath();
-
-    ctx.moveTo(
-      paddingIzquierdo,
-      y
-    );
+    ctx.moveTo(paddingIzquierdo, y);
 
     ctx.lineTo(
       canvasGrafica.width - paddingDerecho,
@@ -387,32 +503,6 @@ function dibujarGraficaMaximos(ejercicioBuscado) {
       y
     );
   }
-
-  /* Ejes */
-
-  ctx.strokeStyle = "#94a3b8";
-  ctx.lineWidth = 1;
-
-  ctx.beginPath();
-
-  ctx.moveTo(
-    paddingIzquierdo,
-    paddingSuperior
-  );
-
-  ctx.lineTo(
-    paddingIzquierdo,
-    canvasGrafica.height - paddingInferior
-  );
-
-  ctx.lineTo(
-    canvasGrafica.width - paddingDerecho,
-    canvasGrafica.height - paddingInferior
-  );
-
-  ctx.stroke();
-
-  /* Línea del progreso */
 
   ctx.beginPath();
 
@@ -442,8 +532,6 @@ function dibujarGraficaMaximos(ejercicioBuscado) {
   ctx.lineWidth = 3;
   ctx.stroke();
 
-  /* Puntos, valores y fechas */
-
   datos.forEach((dato, indice) => {
     const x =
       datos.length === 1
@@ -459,15 +547,11 @@ function dibujarGraficaMaximos(ejercicioBuscado) {
         rango) *
         alto;
 
-    /* Punto */
-
     ctx.beginPath();
     ctx.arc(x, y, 5, 0, Math.PI * 2);
 
     ctx.fillStyle = "#ef4444";
     ctx.fill();
-
-    /* Valor de 1RM */
 
     ctx.fillStyle = "#f8fafc";
     ctx.font = "11px Arial";
@@ -480,34 +564,26 @@ function dibujarGraficaMaximos(ejercicioBuscado) {
       y - 8
     );
 
-    /* Fecha */
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "10px Arial";
+    ctx.textBaseline = "top";
 
-    const mostrarFecha =
-      datos.length <= 6 ||
-      indice === 0 ||
-      indice === datos.length - 1 ||
-      indice % Math.ceil(datos.length / 5) === 0;
-
-    if (mostrarFecha) {
-      ctx.fillStyle = "#94a3b8";
-      ctx.font = "10px Arial";
-      ctx.textBaseline = "top";
-
-      ctx.fillText(
-        obtenerFechaCorta(dato),
-        x,
-        canvasGrafica.height -
-          paddingInferior +
-          10
-      );
-    }
+    ctx.fillText(
+      obtenerFechaCorta(dato),
+      x,
+      canvasGrafica.height -
+        paddingInferior +
+        10
+    );
   });
 
   ctx.textAlign = "start";
   ctx.textBaseline = "alphabetic";
 }
 
-/* Obtener fecha para ordenar */
+/* =========================
+   FECHAS
+========================= */
 
 function obtenerTiempo(registro) {
   if (registro.creado?.toMillis) {
@@ -519,26 +595,19 @@ function obtenerTiempo(registro) {
   }
 
   if (registro.fecha) {
-    const partes =
-      registro.fecha.split("/");
+    const partes = registro.fecha.split("/");
 
     if (partes.length === 3) {
       const dia = Number(partes[0]);
       const mes = Number(partes[1]) - 1;
       const anio = Number(partes[2]);
 
-      return new Date(
-        anio,
-        mes,
-        dia
-      ).getTime();
+      return new Date(anio, mes, dia).getTime();
     }
   }
 
   return 0;
 }
-
-/* Obtener una fecha corta para el eje X */
 
 function obtenerFechaCorta(registro) {
   if (registro.creado?.toDate) {
@@ -551,14 +620,11 @@ function obtenerFechaCorta(registro) {
   }
 
   if (registro.fecha) {
-    const partes =
-      registro.fecha.split("/");
+    const partes = registro.fecha.split("/");
 
     if (partes.length >= 2) {
       return `${partes[0]}/${partes[1]}`;
     }
-
-    return registro.fecha;
   }
 
   return "";
