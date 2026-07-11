@@ -69,7 +69,8 @@ function normalizarRegistro(id, r) {
   const reps = Number(r.reps) || 0;
   return {
     id, ejercicio: r.ejercicio || "", peso, reps,
-    series: Number(r.series) || 0,
+    series: Number(r.series) || 1,
+    equipado: Boolean(r.equipado),
     rpe: r.rpe == null ? null : Number(r.rpe),
     notas: r.notas || "",
     maxpeso: Number(r.maxpeso) || calcular1RM(peso, reps),
@@ -86,6 +87,7 @@ function normalizarSesionRutina(id, sesion) {
     const series = Number(e.seriesReal) || Number(e.seriesObjetivo) || 1;
     return {
       id: `${id}-${i}`, ejercicio: e.ejercicio || "", peso, reps, series,
+      equipado: Boolean(e.equipado),
       rpe: e.rpeReal == null ? null : Number(e.rpeReal),
       notas: `Rutina: ${sesion.nombreRutina || "Rutina"}`,
       maxpeso: calcular1RM(peso, reps), volumen: peso * reps * series,
@@ -118,18 +120,19 @@ form.addEventListener("submit", async (event) => {
   const ejercicio = document.getElementById("exercise").value;
   const peso = numeroValido(document.getElementById("peso").value);
   const reps = numeroValido(document.getElementById("reps").value, { maximo: 36 });
-  const series = numeroValido(document.getElementById("series").value);
+  const series = 1;
+  const equipado = document.getElementById("equipado").checked;
   const rpeTexto = document.getElementById("rpe").value;
   const rpe = rpeTexto === "" ? null : Number(rpeTexto);
   const notas = document.getElementById("notas").value.trim();
 
-  if (!peso || !reps || !series) return alert("Completa peso, reps y series con valores válidos");
+  if (!peso || !reps) return alert("Completa el peso y las repeticiones con valores válidos");
   if (rpe !== null && (rpe < 0 || rpe > 10)) return alert("El RPE debe estar entre 0 y 10");
 
   try {
     await addDoc(collection(db, "usuarios", usuarioActual.uid, "registros"), {
-      ejercicio, peso, reps, series, rpe, notas,
-      volumen: peso * reps * series,
+      ejercicio, peso, reps, series, equipado, rpe, notas,
+      volumen: peso * reps,
       maxpeso: calcular1RM(peso, reps),
       fecha: fechaLocal(), fechaISO: new Date().toISOString(), creado: serverTimestamp()
     });
@@ -194,7 +197,8 @@ function renderizar() {
       ? `<button class="delete" data-id="${r.id}" data-origen="registro" type="button" aria-label="Eliminar">×</button>`
       : "";
     return `<article class="exercise"><div><h3>${escaparHTML(r.ejercicio)}</h3>
-      <p>${Number(r.series)} series · ${Number(r.reps)} reps · ${Number(r.peso)} kg</p>
+      <p>${Number(r.reps)} reps · ${Number(r.peso)} kg</p>
+      <p>${r.equipado ? "✅ Equipado" : "Sin equipamiento"}</p>
       <p>1RM estimado: ${max.toFixed(1)} kg</p>
       <p>${r.origen === "rutina" ? "Registrado desde rutina · " : ""}${escaparHTML(r.fecha || "")}</p>
       ${r.notas ? `<p>Nota: ${escaparHTML(r.notas)}</p>` : ""}</div>

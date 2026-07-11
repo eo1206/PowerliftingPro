@@ -1,10 +1,19 @@
+GYMLOG MEJORADO V6
+
+Cambio de esta versión:
+- Identidad visual general orientada a gimnasio.
+- En Inicio se quitó el campo Series.
+- Se agregó la casilla Levantamiento equipado.
+- Firestore guarda equipado como true o false en cada registro manual.
+- Crear y Rutina conservan su funcionamiento.
+
 POWERLOG MEJORADO V4
 
 Cambios incluidos:
 1. La sección Rutina muestra la última ejecución del mismo ejercicio: peso, repeticiones, series, RPE, fecha y 1RM estimado.
 2. Crear rutina usa tarjetas visuales y permite añadir una imagen desde el teléfono o mediante URL.
 3. Inicio escucha tanto registros manuales como registros de rutina. Los PR se actualizan en ambas páginas.
-4. Nueva sección Ranking con usuarios, PR de sentadilla/banca/muerto y total powerlifting.
+4. Nueva sección Ranking con usuarios, PR de sentadilla/banca/muerto y total gimnasio.
 5. El Service Worker usa caché v8.
 
 IMPORTANTE PARA EL RANKING:

@@ -883,3 +883,29 @@ button {
   .timer-adjust { grid-template-columns: 1fr 1.4fr 1fr; }
   .timer-adjust button { font-size: 13px; }
 }
+
+
+/* Casilla de levantamiento equipado en Inicio */
+.equipped-check {
+  min-height: 56px;
+  margin: 12px 0;
+  padding: 12px 14px;
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+  border-radius: 14px;
+  background: #334155;
+  cursor: pointer;
+}
+.equipped-check input[type="checkbox"] {
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  flex: 0 0 auto;
+  accent-color: #ef4444;
+}
+.equipped-check span {
+  color: #f8fafc;
+  font-size: 14px;
+  font-weight: 600;
+}

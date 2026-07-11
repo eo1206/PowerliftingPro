@@ -3,24 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PowerLog | Inicio</title>
-  <link rel="stylesheet" href="style.css?v=9">
+  <title>GymLog | Inicio</title>
+  <link rel="stylesheet" href="style.css?v=10">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f172a">
 </head>
 <body>
   <div id="estadoConexion" class="estado-conexion hidden"></div>
   <section id="loadingScreen" class="loading-screen">
-    <div class="loader"></div><p>Cargando PowerLog...</p>
+    <div class="loader"></div><p>Cargando GymLog...</p>
   </section>
 
   <main id="appScreen" class="app hidden">
     <header class="header">
-      <div><p class="label">Hola, <span id="nombreUsuario">Usuario</span></p><h1>PowerLog</h1></div>
+      <div><p class="label">Hola, <span id="nombreUsuario">Usuario</span></p><h1>GymLog</h1></div>
       <button id="cerrarSesion" type="button" class="logout">Salir</button>
     </header>
 
-    <section class="card summary"><div><p>Panel de entrenamiento</p><h2>Powerlifting</h2></div></section>
+    <section class="card summary"><div><p>Panel de entrenamiento</p><h2>Gimnasio</h2></div></section>
 
     <section class="stats">
       <div class="stat"><p>Sentadilla</p><h3><span id="prSentadilla">0</span> kg</h3></div>
@@ -38,8 +38,11 @@
           <div><label for="reps">Reps</label><input id="reps" type="number" min="1" max="36" placeholder="5" required></div>
         </div>
         <div class="grid">
-          <div><label for="series">Series</label><input id="series" type="number" min="1" placeholder="3" required></div>
           <div><label for="rpe">RPE</label><input id="rpe" type="number" min="0" max="10" step="0.5" placeholder="8"></div>
+          <label class="equipped-check" for="equipado">
+            <input id="equipado" type="checkbox">
+            <span>Levantamiento equipado</span>
+          </label>
         </div>
         <label for="notas">Notas</label><textarea id="notas" placeholder="Técnica, sensaciones, molestias..."></textarea>
         <button type="submit">Guardar registro</button>
