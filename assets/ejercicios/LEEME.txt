@@ -1,0 +1,15 @@
+Coloca aquí las fotografías administradas por ti con estos nombres:
+
+sentadilla.jpg
+press-banca.jpg
+peso-muerto.jpg
+press-militar.jpg
+remo.jpg
+dominadas.jpg
+fondos.jpg
+hip-thrust.jpg
+curl-biceps.jpg
+extension-triceps.jpg
+
+Puedes modificar nombres o agregar ejercicios editando catalogo-ejercicios.js.
+Los usuarios no pueden subir imágenes desde la aplicación.

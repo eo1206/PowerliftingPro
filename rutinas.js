@@ -5,26 +5,41 @@ import {
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 import { calcular1RM, escaparHTML } from "./utils.js";
 
-const selectorRutina = document.getElementById("selectorRutina");
-const nombreRutinaActiva = document.getElementById("nombreRutinaActiva");
-const estadoRutina = document.getElementById("estadoRutina");
-const contenedorRutina = document.getElementById("contenedorRutina");
-const historialRutina = document.getElementById("historialRutina");
+const ui = {
+  selector: document.getElementById("selectorRutina"),
+  nombre: document.getElementById("nombreRutinaActiva"),
+  estado: document.getElementById("estadoRutina"),
+  contenedor: document.getElementById("contenedorRutina"),
+  historial: document.getElementById("historialRutina"),
+  timerTexto: document.getElementById("temporizadorTexto"),
+  timerEstado: document.getElementById("temporizadorEstado"),
+  timerToggle: document.getElementById("iniciarPausarTemporizador"),
+  timerReset: document.getElementById("reiniciarTemporizador"),
+  timerMas: document.getElementById("aumentarDescanso"),
+  timerMenos: document.getElementById("reducirDescanso")
+};
 
 let usuarioActual = null;
+let nombreActual = "Usuario";
 let rutinas = [];
-let rutinaActualId = null;
 let rutinaActual = null;
+let rutinaActualId = null;
 let ejerciciosCompletados = [];
 let historialEjercicios = [];
 let cancelarRutinas = null;
 let cancelarNormales = null;
 let cancelarSesiones = null;
-let nombreActual = "Usuario";
+
+let duracionBase = 180;
+let segundosRestantes = 180;
+let temporizadorId = null;
+let temporizadorActivo = false;
 
 await authPreparado.catch(console.error);
 onAuthStateChanged(auth, (user) => {
-  cancelarRutinas?.(); cancelarNormales?.(); cancelarSesiones?.();
+  cancelarRutinas?.();
+  cancelarNormales?.();
+  cancelarSesiones?.();
   if (!user) return window.location.replace("index.html");
   usuarioActual = user;
   getDoc(doc(db, "usuarios", user.uid)).then((perfil) => {
@@ -38,13 +53,10 @@ function cargarRutinas() {
   const consulta = query(collection(db, "usuarios", usuarioActual.uid, "rutina"), orderBy("creado", "desc"));
   cancelarRutinas = onSnapshot(consulta, (snapshot) => {
     rutinas = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-    selectorRutina.innerHTML = rutinas.length
+    ui.selector.innerHTML = rutinas.length
       ? `<option value="">Selecciona una rutina</option>${rutinas.map((r) => `<option value="${r.id}">${escaparHTML(r.nombre)}</option>`).join("")}`
-      : `<option value="">No tienes rutinas</option>`;
-
-    if (!rutinas.length) {
-      contenedorRutina.innerHTML = '<h2>Ejercicios</h2><p class="empty">Ve a Crear para hacer tu primera rutina.</p>';
-    }
+      : '<option value="">No tienes rutinas</option>';
+    if (!rutinas.length) ui.contenedor.innerHTML = '<h2>Ejercicios</h2><p class="empty">Ve a Crear para hacer tu primera rutina.</p>';
   }, console.error);
 }
 
@@ -68,8 +80,10 @@ function cargarHistorialGeneral() {
         ejercicio: e.ejercicio || "",
         peso: Number(e.pesoReal) || 0,
         reps: Number(e.repsReal) || 0,
-        series: Number(e.seriesReal) || Number(e.seriesObjetivo) || 1,
+        series: Number(e.seriesReal) || (Array.isArray(e.seriesDetalle) ? e.seriesDetalle.length : 1),
         rpe: e.rpeReal == null ? null : Number(e.rpeReal),
+        seriesDetalle: Array.isArray(e.seriesDetalle) ? e.seriesDetalle : [],
+        maxpeso: Number(e.maxpeso) || 0,
         fecha: sesion.fecha || "",
         fechaISO: sesion.fechaISO || "",
         creado: sesion.creado,
@@ -90,54 +104,82 @@ function tiempo(r) {
   return Number.isFinite(iso) ? iso : 0;
 }
 
-function ultimoRegistro(nombre) {
-  return historialEjercicios.find((r) => r.ejercicio === nombre && Number(r.peso) > 0 && Number(r.reps) > 0) || null;
+function fechaVisible(r) {
+  const t = tiempo(r);
+  if (t) return new Intl.DateTimeFormat("es-MX", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(t));
+  return r.fecha || "Sin fecha";
 }
 
-function notaAnterior(nombre) {
-  const anterior = ultimoRegistro(nombre);
-  if (!anterior) return '<p class="previous-note empty">Sin registros anteriores para este ejercicio.</p>';
-  const rpe = anterior.rpe == null || Number.isNaN(Number(anterior.rpe)) ? "Sin RPE" : `RPE ${Number(anterior.rpe)}`;
-  return `<aside class="previous-note"><strong>Última vez</strong><span>${Number(anterior.peso)} kg × ${Number(anterior.reps)} reps · ${Number(anterior.series) || 1} series</span><span>${rpe} · ${escaparHTML(anterior.fecha || "Sin fecha")}</span><span>1RM estimado: ${calcular1RM(Number(anterior.peso), Number(anterior.reps)).toFixed(1)} kg</span></aside>`;
+function registrosAnteriores(nombre) {
+  return historialEjercicios.filter((r) => r.ejercicio === nombre && Number(r.peso) > 0 && Number(r.reps) > 0).slice(0, 5);
 }
 
-selectorRutina.addEventListener("change", () => {
-  const id = selectorRutina.value;
+function historialDesplegable(nombre) {
+  const registros = registrosAnteriores(nombre);
+  return `<details class="previous-history">
+    <summary>Ver pesos y repeticiones anteriores</summary>
+    <div class="previous-history-content">
+      ${registros.length ? registros.map((r) => {
+        const detalleSeries = Array.isArray(r.seriesDetalle) && r.seriesDetalle.length
+          ? r.seriesDetalle.map((s, i) => `<span>Serie ${i + 1}: ${Number(s.peso) || 0} kg × ${Number(s.reps) || 0}</span>`).join("")
+          : `<span>${Number(r.series) || 1} series · ${Number(r.peso)} kg × ${Number(r.reps)} reps</span>`;
+        return `<article class="previous-entry"><strong>${escaparHTML(fechaVisible(r))}</strong>${detalleSeries}<small>1RM estimado: ${(Number(r.maxpeso) || calcular1RM(Number(r.peso), Number(r.reps))).toFixed(1)} kg</small></article>`;
+      }).join("") : '<p class="empty">Sin registros anteriores para este ejercicio.</p>'}
+    </div>
+  </details>`;
+}
+
+ui.selector.addEventListener("change", () => {
+  const id = ui.selector.value;
   if (!id) {
-    rutinaActualId = null; rutinaActual = null; ejerciciosCompletados = [];
-    nombreRutinaActiva.textContent = "Sin rutina"; estadoRutina.textContent = "---";
-    contenedorRutina.innerHTML = '<h2>Ejercicios</h2><p class="empty">Selecciona una rutina para comenzar.</p>';
+    rutinaActualId = null;
+    rutinaActual = null;
+    ejerciciosCompletados = [];
+    ui.nombre.textContent = "Sin rutina";
+    ui.estado.textContent = "---";
+    ui.contenedor.innerHTML = '<h2>Ejercicios</h2><p class="empty">Selecciona una rutina para comenzar.</p>';
     return;
   }
-  rutinaActual = rutinas.find((r) => r.id === id);
+  rutinaActual = rutinas.find((r) => r.id === id) || null;
   rutinaActualId = id;
   ejerciciosCompletados = [];
   mostrarRutina(rutinaActual);
 });
 
-function mostrarRutina(rutina) {
-  if (!rutina) return;
-  nombreRutinaActiva.textContent = rutina.nombre;
-  estadoRutina.textContent = rutina.estado || "activa";
-  const ejercicios = Array.isArray(rutina.ejercicios) ? rutina.ejercicios : [];
-
-  contenedorRutina.innerHTML = `<h2>Ejercicios</h2>${ejercicios.map((item, index) => `
-    <article class="routine-exercise ${ejerciciosCompletados[index] ? "completed" : ""}" id="ejercicio-card-${index}">
-      ${item.imagen ? `<img src="${escaparHTML(item.imagen)}" alt="${escaparHTML(item.ejercicio)}" class="exercise-image routine-main-image">` : ""}
-      <div class="routine-top"><div><h3><span class="routine-number">${index + 1}</span>${escaparHTML(item.ejercicio)}<span id="check-${index}" class="check">${ejerciciosCompletados[index] ? "✅" : ""}</span></h3>
-      <p>${Number(item.series)} series · ${Number(item.repsObjetivo)} reps objetivo</p></div></div>
-      ${notaAnterior(item.ejercicio)}
-      <div class="routine-inputs">
-        <div><label for="pesoReal-${index}">Peso realizado</label><input id="pesoReal-${index}" type="number" min="0" step="0.5" placeholder="kg" value="${ejerciciosCompletados[index]?.pesoReal ?? ""}"></div>
-        <div><label for="repsReal-${index}">Reps reales</label><input id="repsReal-${index}" type="number" min="1" placeholder="reps" value="${ejerciciosCompletados[index]?.repsReal ?? ""}"></div>
-        <div><label for="rpeReal-${index}">RPE</label><input id="rpeReal-${index}" type="number" min="0" max="10" step="0.5" placeholder="RPE" value="${ejerciciosCompletados[index]?.rpeReal ?? ""}"></div>
-      </div>
-      <button class="complete-routine" data-index="${index}" type="button">${ejerciciosCompletados[index] ? "Actualizar ejercicio" : "Completar ejercicio"}</button>
-    </article>`).join("")}
-    <button id="guardarSesionRutina" type="button">Guardar sesión de rutina</button>`;
+function serieGuardada(indexEjercicio, indexSerie) {
+  return ejerciciosCompletados[indexEjercicio]?.seriesDetalle?.[indexSerie] || {};
 }
 
-contenedorRutina.addEventListener("click", (event) => {
+function mostrarRutina(rutina) {
+  if (!rutina) return;
+  ui.nombre.textContent = rutina.nombre;
+  ui.estado.textContent = rutina.estado || "activa";
+  const ejercicios = Array.isArray(rutina.ejercicios) ? rutina.ejercicios : [];
+
+  ui.contenedor.innerHTML = `<h2>Ejercicios</h2>${ejercicios.map((item, index) => {
+    const cantidadSeries = Math.max(1, Number(item.series) || 1);
+    return `<article class="routine-exercise ${ejerciciosCompletados[index] ? "completed" : ""}" id="ejercicio-card-${index}">
+      ${item.imagen ? `<div class="routine-image-wrap"><img src="${escaparHTML(item.imagen)}" alt="${escaparHTML(item.ejercicio)}" class="exercise-image routine-main-image" onerror="this.parentElement.hidden=true"></div>` : ""}
+      <div class="routine-top"><div><h3><span class="routine-number">${index + 1}</span>${escaparHTML(item.ejercicio)}<span class="check">${ejerciciosCompletados[index] ? "✅" : ""}</span></h3><p>${cantidadSeries} series · ${Number(item.repsObjetivo) || 1} reps objetivo</p></div></div>
+      ${historialDesplegable(item.ejercicio)}
+      <div class="series-entry-list">
+        ${Array.from({ length: cantidadSeries }, (_, serieIndex) => {
+          const guardada = serieGuardada(index, serieIndex);
+          return `<fieldset class="series-entry"><legend>Serie ${serieIndex + 1}</legend>
+            <div class="series-entry-grid">
+              <div><label for="peso-${index}-${serieIndex}">Peso</label><input id="peso-${index}-${serieIndex}" type="number" min="0" step="0.5" placeholder="kg" value="${guardada.peso ?? ""}"></div>
+              <div><label for="reps-${index}-${serieIndex}">Reps</label><input id="reps-${index}-${serieIndex}" type="number" min="1" placeholder="reps" value="${guardada.reps ?? ""}"></div>
+              <div><label for="rpe-${index}-${serieIndex}">RPE</label><input id="rpe-${index}-${serieIndex}" type="number" min="0" max="10" step="0.5" placeholder="RPE" value="${guardada.rpe ?? ""}"></div>
+            </div>
+          </fieldset>`;
+        }).join("")}
+      </div>
+      <button class="complete-routine" data-index="${index}" type="button">${ejerciciosCompletados[index] ? "Actualizar ejercicio" : "Completar ejercicio"}</button>
+    </article>`;
+  }).join("")}<button id="guardarSesionRutina" type="button">Guardar sesión de rutina</button>`;
+}
+
+ui.contenedor.addEventListener("click", (event) => {
   const boton = event.target.closest(".complete-routine");
   if (boton) completarEjercicio(Number(boton.dataset.index));
   if (event.target.closest("#guardarSesionRutina")) guardarSesionRutina();
@@ -146,21 +188,32 @@ contenedorRutina.addEventListener("click", (event) => {
 function completarEjercicio(index) {
   if (!rutinaActual || !rutinaActualId) return alert("Selecciona una rutina primero");
   const ejercicio = rutinaActual.ejercicios[index];
-  const pesoReal = Number(document.getElementById(`pesoReal-${index}`).value);
-  const repsReal = Number(document.getElementById(`repsReal-${index}`).value);
-  const rpeTexto = document.getElementById(`rpeReal-${index}`).value;
-  const rpeReal = rpeTexto === "" ? null : Number(rpeTexto);
+  const cantidadSeries = Math.max(1, Number(ejercicio.series) || 1);
+  const seriesDetalle = [];
 
-  if (!(pesoReal > 0) || !(repsReal > 0)) return alert("Agrega peso y reps realizadas");
-  if (rpeReal !== null && (rpeReal < 0 || rpeReal > 10)) return alert("El RPE debe estar entre 0 y 10");
+  for (let i = 0; i < cantidadSeries; i++) {
+    const peso = Number(document.getElementById(`peso-${index}-${i}`).value);
+    const reps = Number(document.getElementById(`reps-${index}-${i}`).value);
+    const rpeTexto = document.getElementById(`rpe-${index}-${i}`).value;
+    const rpe = rpeTexto === "" ? null : Number(rpeTexto);
+    if (!(peso > 0) || !(reps > 0)) return alert(`Completa peso y repeticiones de la serie ${i + 1}`);
+    if (rpe !== null && (rpe < 0 || rpe > 10)) return alert(`El RPE de la serie ${i + 1} debe estar entre 0 y 10`);
+    seriesDetalle.push({ peso, reps, rpe });
+  }
+
+  const mejorSerie = seriesDetalle.reduce((mejor, serie) => calcular1RM(serie.peso, serie.reps) > calcular1RM(mejor.peso, mejor.reps) ? serie : mejor, seriesDetalle[0]);
+  const maxpeso = Math.max(...seriesDetalle.map((serie) => calcular1RM(serie.peso, serie.reps)));
 
   ejerciciosCompletados[index] = {
     ejercicio: ejercicio.ejercicio,
-    seriesObjetivo: Number(ejercicio.series) || 1,
+    seriesObjetivo: cantidadSeries,
     repsObjetivo: Number(ejercicio.repsObjetivo) || 1,
-    seriesReal: Number(ejercicio.series) || 1,
-    pesoReal, repsReal, rpeReal,
-    maxpeso: calcular1RM(pesoReal, repsReal)
+    seriesReal: seriesDetalle.length,
+    seriesDetalle,
+    pesoReal: mejorSerie.peso,
+    repsReal: mejorSerie.reps,
+    rpeReal: mejorSerie.rpe,
+    maxpeso
   };
   mostrarRutina(rutinaActual);
 }
@@ -183,13 +236,62 @@ async function guardarSesionRutina() {
     });
     ejerciciosCompletados = [];
     mostrarRutina(rutinaActual);
-    alert("Sesión guardada. Los PR también se actualizarán en Inicio y Progreso.");
+    alert("Sesión guardada. Los PR se actualizarán en Inicio, Progreso y Ranking.");
   } catch (error) {
     console.error(error);
     alert("No se pudieron guardar los datos");
   }
 }
 
+function formatearTiempo(segundos) {
+  const minutos = Math.floor(segundos / 60).toString().padStart(2, "0");
+  const resto = (segundos % 60).toString().padStart(2, "0");
+  return `${minutos}:${resto}`;
+}
+
+function actualizarTemporizadorUI() {
+  ui.timerTexto.textContent = formatearTiempo(segundosRestantes);
+  ui.timerToggle.textContent = temporizadorActivo ? "Pausar" : (segundosRestantes === duracionBase ? "Iniciar" : "Continuar");
+  ui.timerEstado.textContent = temporizadorActivo ? "Corriendo" : (segundosRestantes === 0 ? "Terminado" : "Listo");
+  document.title = temporizadorActivo ? `${formatearTiempo(segundosRestantes)} · PowerLog` : "PowerliftingPro | Rutina";
+}
+
+function detenerTemporizador() {
+  if (temporizadorId) clearInterval(temporizadorId);
+  temporizadorId = null;
+  temporizadorActivo = false;
+  actualizarTemporizadorUI();
+}
+
+function iniciarTemporizador() {
+  if (segundosRestantes <= 0) segundosRestantes = duracionBase;
+  temporizadorActivo = true;
+  temporizadorId = setInterval(() => {
+    segundosRestantes -= 1;
+    if (segundosRestantes <= 0) {
+      segundosRestantes = 0;
+      detenerTemporizador();
+      if (navigator.vibrate) navigator.vibrate([250, 120, 250]);
+      alert("Descanso terminado");
+      return;
+    }
+    actualizarTemporizadorUI();
+  }, 1000);
+  actualizarTemporizadorUI();
+}
+
+document.querySelectorAll(".timer-preset").forEach((boton) => boton.addEventListener("click", () => {
+  detenerTemporizador();
+  duracionBase = Number(boton.dataset.segundos) || 180;
+  segundosRestantes = duracionBase;
+  document.querySelectorAll(".timer-preset").forEach((b) => b.classList.toggle("active", b === boton));
+  actualizarTemporizadorUI();
+}));
+
+ui.timerToggle.addEventListener("click", () => temporizadorActivo ? detenerTemporizador() : iniciarTemporizador());
+ui.timerReset.addEventListener("click", () => { detenerTemporizador(); segundosRestantes = duracionBase; actualizarTemporizadorUI(); });
+ui.timerMas.addEventListener("click", () => { segundosRestantes = Math.min(3600, segundosRestantes + 15); duracionBase = Math.max(duracionBase, segundosRestantes); actualizarTemporizadorUI(); });
+ui.timerMenos.addEventListener("click", () => { segundosRestantes = Math.max(15, segundosRestantes - 15); if (!temporizadorActivo) duracionBase = segundosRestantes; actualizarTemporizadorUI(); });
 
 async function actualizarRankingDesdeHistorial() {
   if (!usuarioActual) return;
@@ -216,6 +318,8 @@ async function actualizarRankingDesdeHistorial() {
 }
 
 function renderizarHistorialSesiones(sesiones) {
-  historialRutina.innerHTML = `<h2>Registros de rutina</h2>${sesiones.length ? sesiones.slice(0, 10).map((r) => `
+  ui.historial.innerHTML = `<h2>Registros de rutina</h2>${sesiones.length ? sesiones.slice(0, 10).map((r) => `
     <article class="exercise"><div><h3>${escaparHTML(r.nombreRutina || "Rutina")}</h3><p>${Number(r.ejerciciosCompletados) || 0}/${Number(r.totalEjercicios) || 0} ejercicios completados</p><p>${escaparHTML(r.fecha || "")}</p></div></article>`).join("") : '<p class="empty">Todavía no hay registros.</p>'}`;
 }
+
+actualizarTemporizadorUI();

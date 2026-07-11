@@ -12,3 +12,12 @@ Copia el contenido de firestore.rules en Firebase Console > Firestore Database >
 Sin esas reglas, la aplicación puede mostrar un error de permisos al leer o escribir la colección ranking.
 
 Las imágenes cargadas desde el teléfono se comprimen antes de guardarse. Usa imágenes pequeñas para no superar el límite de tamaño de documentos de Firestore.
+
+CAMBIOS V9
+- El usuario ya no puede subir imágenes.
+- Las fotografías las administra el propietario en assets/ejercicios/.
+- El catálogo se modifica desde catalogo-ejercicios.js.
+- Crear rutina usa buscador y tarjetas con iconos/fotos; se eliminó la lista select.
+- En Rutina, el historial de cada ejercicio está dentro de un menú desplegable.
+- Se genera un bloque por cada serie configurada, con peso, reps y RPE.
+- Incluye temporizador de 3:00 y 1:30, ajuste de ±15 s, pausa y reinicio.

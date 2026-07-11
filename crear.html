@@ -4,53 +4,38 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PowerliftingPro | Crear rutina</title>
-  <link rel="stylesheet" href="style.css?v=8">
+  <link rel="stylesheet" href="style.css?v=9">
 </head>
 <body>
 <div id="estadoConexion" class="estado-conexion hidden"></div>
 <main class="app">
-
   <header class="header">
-    <div>
-      <p class="label">Constructor</p>
-      <h1>Crear rutina</h1>
-    </div>
+    <div><p class="label">Constructor</p><h1>Crear rutina</h1></div>
     <div class="profile">PL</div>
   </header>
 
   <section class="card">
     <h2>Nueva rutina</h2>
-
     <label for="nombreRutina">Nombre de la rutina</label>
-    <input id="nombreRutina" type="text" placeholder="Ej: Fuerza semana 1">
+    <input id="nombreRutina" type="text" maxlength="60" placeholder="Ej: Fuerza semana 1">
 
-    <label>Escoge un ejercicio</label>
-    <div id="catalogoEjercicios" class="exercise-catalog"></div>
+    <label for="buscadorEjercicio">Buscar ejercicio</label>
+    <input id="buscadorEjercicio" type="search" placeholder="Escribe sentadilla, banca, remo..." autocomplete="off">
 
-    <label for="ejercicioRutina">Ejercicio seleccionado</label>
-    <select id="ejercicioRutina">
-      <option>Sentadilla</option><option>Press banca</option><option>Peso muerto</option>
-      <option>Press militar</option><option>Remo</option><option>Dominadas</option>
-      <option>Fondos</option><option>Hip thrust</option><option>Curl bíceps</option><option>Extensión tríceps</option>
-    </select>
+    <p class="label">Selecciona una tarjeta</p>
+    <div id="catalogoEjercicios" class="exercise-catalog" role="listbox" aria-label="Catálogo de ejercicios"></div>
+    <p id="ejercicioSeleccionadoTexto" class="selected-exercise-text">Ningún ejercicio seleccionado</p>
 
     <div class="grid">
       <div>
         <label for="seriesRutina">Series</label>
-        <input id="seriesRutina" type="number" placeholder="Ej: 5">
+        <input id="seriesRutina" type="number" min="1" max="20" placeholder="Ej: 5">
       </div>
-
       <div>
         <label for="repsRutina">Reps objetivo</label>
-        <input id="repsRutina" type="number" placeholder="Ej: 3">
+        <input id="repsRutina" type="number" min="1" max="100" placeholder="Ej: 3">
       </div>
     </div>
-
-    <label for="imagenEjercicio">Imagen del ejercicio (opcional)</label>
-    <input id="imagenEjercicio" type="file" accept="image/*">
-    <label for="imagenUrl">O pega una URL de imagen</label>
-    <input id="imagenUrl" type="url" placeholder="https://...">
-    <p class="helper-text">Las imágenes del teléfono se comprimen antes de guardarse.</p>
 
     <button id="agregarEjercicioRutina" type="button">Agregar ejercicio</button>
   </section>
@@ -60,20 +45,13 @@
     <p class="empty">Agrega ejercicios para crear tu rutina.</p>
   </section>
 
-  <section class="card">
-    <button id="guardarRutina" type="button">Guardar rutina</button>
-  </section>
-<nav class="bottom-nav">
-    <a href="inicio.html">Inicio</a>
-    <a href="crear.html" class="active">Crear</a>
-    <a href="rutina.html">Rutina</a>
-    <a href="progreso.html">Progreso</a>
-    <a href="ranking.html">Ranking</a><a href="Herramientas.html">Herramientas</a>
+  <section class="card"><button id="guardarRutina" type="button">Guardar rutina</button></section>
+
+  <nav class="bottom-nav">
+    <a href="inicio.html">Inicio</a><a href="crear.html" class="active">Crear</a><a href="rutina.html">Rutina</a>
+    <a href="progreso.html">Progreso</a><a href="ranking.html">Ranking</a><a href="Herramientas.html">Herramientas</a>
   </nav>
-
-
 </main>
-
 <script type="module" src="crear.js"></script>
 <script src="conexion.js" defer></script>
 <script src="pwa.js" defer></script>

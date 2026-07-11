@@ -4,58 +4,59 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PowerliftingPro | Rutina</title>
-  <link rel="stylesheet" href="style.css?v=8">
+  <link rel="stylesheet" href="style.css?v=9">
 </head>
 <body>
 <div id="estadoConexion" class="estado-conexion hidden"></div>
 <main class="app">
-
   <header class="header">
-    <div>
-      <p class="label">Plan activo</p>
-      <h1>Mi rutina</h1>
-    </div>
+    <div><p class="label">Plan activo</p><h1>Mi rutina</h1></div>
     <div class="profile">PL</div>
   </header>
-<section class="card">
-  <h2>Seleccionar rutina</h2>
 
-  <label for="selectorRutina">Rutina</label>
-  <select id="selectorRutina">
-    <option value="">Cargando rutinas...</option>
-  </select>
-</section>
+  <section class="card">
+    <h2>Seleccionar rutina</h2>
+    <label for="selectorRutina">Rutina</label>
+    <select id="selectorRutina"><option value="">Cargando rutinas...</option></select>
+  </section>
 
-<section class="card summary">
-  <div>
-    <p>Rutina seleccionada</p>
-    <h2 id="nombreRutinaActiva">Sin rutina</h2>
-  </div>
-  <span id="estadoRutina">---</span>
-</section>
+  <section class="card summary">
+    <div><p>Rutina seleccionada</p><h2 id="nombreRutinaActiva">Sin rutina</h2></div>
+    <span id="estadoRutina">---</span>
+  </section>
 
-<section class="card" id="contenedorRutina">
-  <h2>Ejercicios</h2>
-  <p class="empty">Selecciona una rutina para comenzar.</p>
-</section>
+  <section class="card rest-timer-card">
+    <div class="timer-header">
+      <div><p class="label">Descanso</p><h2 id="temporizadorTexto">03:00</h2></div>
+      <span id="temporizadorEstado" class="timer-status">Listo</span>
+    </div>
+    <div class="timer-presets">
+      <button type="button" class="timer-preset active" data-segundos="180">3 min</button>
+      <button type="button" class="timer-preset" data-segundos="90">1.5 min</button>
+    </div>
+    <div class="timer-adjust">
+      <button id="reducirDescanso" type="button" aria-label="Reducir descanso">−15 s</button>
+      <button id="iniciarPausarTemporizador" type="button">Iniciar</button>
+      <button id="aumentarDescanso" type="button" aria-label="Aumentar descanso">+15 s</button>
+    </div>
+    <button id="reiniciarTemporizador" class="secondary-button" type="button">Reiniciar</button>
+  </section>
 
-<section class="card" id="historialRutina">
-  <h2>Registros de rutina</h2>
-  <p class="empty">Todavía no hay registros.</p>
-</section>
+  <section class="card" id="contenedorRutina">
+    <h2>Ejercicios</h2>
+    <p class="empty">Selecciona una rutina para comenzar.</p>
+  </section>
 
+  <section class="card" id="historialRutina">
+    <h2>Registros de rutina</h2>
+    <p class="empty">Todavía no hay registros.</p>
+  </section>
 
-<nav class="bottom-nav">
-    <a href="inicio.html">Inicio</a>
-    <a href="crear.html">Crear</a>
-    <a href="rutina.html" class="active">Rutina</a>
-    <a href="progreso.html">Progreso</a>
-    <a href="ranking.html">Ranking</a><a href="Herramientas.html">Herramientas</a>
+  <nav class="bottom-nav">
+    <a href="inicio.html">Inicio</a><a href="crear.html">Crear</a><a href="rutina.html" class="active">Rutina</a>
+    <a href="progreso.html">Progreso</a><a href="ranking.html">Ranking</a><a href="Herramientas.html">Herramientas</a>
   </nav>
-
-
 </main>
-
 <script type="module" src="rutinas.js"></script>
 <script src="conexion.js" defer></script>
 <script src="pwa.js" defer></script>
