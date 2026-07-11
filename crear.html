@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PowerliftingPro | Crear rutina</title>
-  <link rel="stylesheet" href="style.css?v=7">
+  <link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
 <div id="estadoConexion" class="estado-conexion hidden"></div>
@@ -24,18 +24,14 @@
     <label for="nombreRutina">Nombre de la rutina</label>
     <input id="nombreRutina" type="text" placeholder="Ej: Fuerza semana 1">
 
-    <label for="ejercicioRutina">Ejercicio</label>
+    <label>Escoge un ejercicio</label>
+    <div id="catalogoEjercicios" class="exercise-catalog"></div>
+
+    <label for="ejercicioRutina">Ejercicio seleccionado</label>
     <select id="ejercicioRutina">
-      <option>Sentadilla</option>
-      <option>Press banca</option>
-      <option>Peso muerto</option>
-      <option>Press militar</option>
-      <option>Remo</option>
-      <option>Dominadas</option>
-      <option>Fondos</option>
-      <option>Hip thrust</option>
-      <option>Curl bíceps</option>
-      <option>Extensión tríceps</option>
+      <option>Sentadilla</option><option>Press banca</option><option>Peso muerto</option>
+      <option>Press militar</option><option>Remo</option><option>Dominadas</option>
+      <option>Fondos</option><option>Hip thrust</option><option>Curl bíceps</option><option>Extensión tríceps</option>
     </select>
 
     <div class="grid">
@@ -50,6 +46,12 @@
       </div>
     </div>
 
+    <label for="imagenEjercicio">Imagen del ejercicio (opcional)</label>
+    <input id="imagenEjercicio" type="file" accept="image/*">
+    <label for="imagenUrl">O pega una URL de imagen</label>
+    <input id="imagenUrl" type="url" placeholder="https://...">
+    <p class="helper-text">Las imágenes del teléfono se comprimen antes de guardarse.</p>
+
     <button id="agregarEjercicioRutina" type="button">Agregar ejercicio</button>
   </section>
 
@@ -62,11 +64,11 @@
     <button id="guardarRutina" type="button">Guardar rutina</button>
   </section>
 <nav class="bottom-nav">
-    <a href="index.html">Inicio</a>
+    <a href="inicio.html">Inicio</a>
     <a href="crear.html" class="active">Crear</a>
     <a href="rutina.html">Rutina</a>
     <a href="progreso.html">Progreso</a>
-    <a href="Herramientas.html">Herramientas</a>
+    <a href="ranking.html">Ranking</a><a href="Herramientas.html">Herramientas</a>
   </nav>
 
 

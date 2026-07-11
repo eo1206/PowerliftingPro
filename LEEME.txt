@@ -1,0 +1,14 @@
+POWERLOG MEJORADO V4
+
+Cambios incluidos:
+1. La sección Rutina muestra la última ejecución del mismo ejercicio: peso, repeticiones, series, RPE, fecha y 1RM estimado.
+2. Crear rutina usa tarjetas visuales y permite añadir una imagen desde el teléfono o mediante URL.
+3. Inicio escucha tanto registros manuales como registros de rutina. Los PR se actualizan en ambas páginas.
+4. Nueva sección Ranking con usuarios, PR de sentadilla/banca/muerto y total powerlifting.
+5. El Service Worker usa caché v8.
+
+IMPORTANTE PARA EL RANKING:
+Copia el contenido de firestore.rules en Firebase Console > Firestore Database > Rules y publícalo.
+Sin esas reglas, la aplicación puede mostrar un error de permisos al leer o escribir la colección ranking.
+
+Las imágenes cargadas desde el teléfono se comprimen antes de guardarse. Usa imágenes pequeñas para no superar el límite de tamaño de documentos de Firestore.
