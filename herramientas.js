@@ -1,4 +1,4 @@
-const discosCheckbox = document.querySelectorAll(".disco");
+import { obtenerConfiguracion, guardarConfiguracion, restablecerConfiguracion } from "./settings.js";
 
 const calcularDiscos = document.getElementById("calcularDiscos");
 const calcularPeso = document.getElementById("calcularPeso");
@@ -6,9 +6,9 @@ const calcular1RM = document.getElementById("calcular1RM");
 const calcularGL = document.getElementById("calcularGL");
 
 function obtenerDiscosDisponibles() {
-  return Array.from(discosCheckbox)
-    .filter(disco => disco.checked)
-    .map(disco => Number(disco.value))
+  return [...obtenerConfiguracion().discosDisponibles]
+    .map(Number)
+    .filter((valor) => Number.isFinite(valor) && valor > 0)
     .sort((a, b) => b - a);
 }
 
@@ -179,3 +179,121 @@ calcularGL.addEventListener("click", () => {
     <h3>IPF GL: ${puntos.toFixed(3)} puntos</h3>
   `;
 });
+
+// =========================
+// Ajustes de GymLog
+// =========================
+const panelAjustes = document.getElementById("panelAjustes");
+const abrirAjustes = document.getElementById("abrirAjustes");
+const abrirAjustesSecundario = document.getElementById("abrirAjustesSecundario");
+const cerrarAjustes = document.getElementById("cerrarAjustes");
+const guardarAjustesBtn = document.getElementById("guardarAjustes");
+const restablecerAjustesBtn = document.getElementById("restablecerAjustes");
+const ajustePesoBarra = document.getElementById("ajustePesoBarra");
+const resumenConfiguracion = document.getElementById("resumenConfiguracion");
+const checkboxesDiscos = [...document.querySelectorAll("#ajustesDiscos input[type='checkbox']")];
+const opcionesTema = [...document.querySelectorAll(".theme-option")];
+
+function nombreTema(tema) {
+  return ({ rojo: "Rojo", rosa: "Rosa", azul: "Azul", morado: "Morado", verde: "Verde" })[tema] || "Rojo";
+}
+
+function cargarAjustesEnFormulario() {
+  const config = obtenerConfiguracion();
+  ajustePesoBarra.value = config.pesoBarra;
+
+  checkboxesDiscos.forEach((checkbox) => {
+    checkbox.checked = config.discosDisponibles.map(Number).includes(Number(checkbox.value));
+  });
+
+  opcionesTema.forEach((boton) => {
+    boton.classList.toggle("selected", boton.dataset.themeValue === config.tema);
+  });
+}
+
+function aplicarAjustesEnHerramientas() {
+  const config = obtenerConfiguracion();
+  const pesoBarraInput = document.getElementById("pesoBarra");
+  if (pesoBarraInput) pesoBarraInput.value = config.pesoBarra;
+
+  const discos = config.discosDisponibles
+    .map(Number)
+    .sort((a, b) => b - a)
+    .map((peso) => `${peso} kg`)
+    .join(", ");
+
+  if (resumenConfiguracion) {
+    resumenConfiguracion.textContent = `Barra: ${config.pesoBarra} kg · Discos: ${discos || "ninguno"} · Tema: ${nombreTema(config.tema)}`;
+  }
+}
+
+function mostrarAjustes() {
+  cargarAjustesEnFormulario();
+  panelAjustes.classList.remove("hidden");
+  panelAjustes.setAttribute("aria-hidden", "false");
+  document.body.classList.add("settings-open");
+}
+
+function ocultarAjustes() {
+  panelAjustes.classList.add("hidden");
+  panelAjustes.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("settings-open");
+}
+
+abrirAjustes?.addEventListener("click", mostrarAjustes);
+abrirAjustesSecundario?.addEventListener("click", mostrarAjustes);
+cerrarAjustes?.addEventListener("click", ocultarAjustes);
+
+panelAjustes?.addEventListener("click", (event) => {
+  if (event.target === panelAjustes) ocultarAjustes();
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !panelAjustes?.classList.contains("hidden")) ocultarAjustes();
+});
+
+opcionesTema.forEach((boton) => {
+  boton.addEventListener("click", () => {
+    opcionesTema.forEach((opcion) => opcion.classList.remove("selected"));
+    boton.classList.add("selected");
+    document.documentElement.dataset.theme = boton.dataset.themeValue;
+  });
+});
+
+guardarAjustesBtn?.addEventListener("click", async () => {
+  const pesoBarra = Number(ajustePesoBarra.value);
+  const discosDisponibles = checkboxesDiscos
+    .filter((checkbox) => checkbox.checked)
+    .map((checkbox) => Number(checkbox.value));
+  const tema = document.querySelector(".theme-option.selected")?.dataset.themeValue || "rojo";
+
+  if (!Number.isFinite(pesoBarra) || pesoBarra < 0) {
+    await window.appAlert?.("Escribe un peso de barra válido.", { titulo: "Revisa el peso", tipo: "warning" });
+    return;
+  }
+
+  if (!discosDisponibles.length) {
+    await window.appAlert?.("Selecciona al menos un disco disponible.", { titulo: "Faltan discos", tipo: "warning" });
+    return;
+  }
+
+  guardarConfiguracion({ pesoBarra, discosDisponibles, tema });
+  aplicarAjustesEnHerramientas();
+  ocultarAjustes();
+  await window.appAlert?.("Tus preferencias se guardaron en este dispositivo.", { titulo: "Ajustes guardados", tipo: "success" });
+});
+
+restablecerAjustesBtn?.addEventListener("click", async () => {
+  const confirmar = window.appConfirm
+    ? await window.appConfirm("Se restaurará la barra de 20 kg, los discos predeterminados y el tema rojo.", { titulo: "Restablecer ajustes" })
+    : window.confirm("¿Restablecer ajustes?");
+  if (!confirmar) return;
+
+  restablecerConfiguracion();
+  cargarAjustesEnFormulario();
+  aplicarAjustesEnHerramientas();
+});
+
+window.addEventListener("gymlog:config", aplicarAjustesEnHerramientas);
+cargarAjustesEnFormulario();
+aplicarAjustesEnHerramientas();
