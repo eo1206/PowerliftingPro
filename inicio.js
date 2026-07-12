@@ -145,7 +145,9 @@ form.addEventListener("submit", async (event) => {
 
 lista.addEventListener("click", async (event) => {
   const boton = event.target.closest(".delete");
-  if (!boton || boton.dataset.origen !== "registro" || !usuarioActual || !confirm("¿Eliminar este registro?")) return;
+  if (!boton || boton.dataset.origen !== "registro" || !usuarioActual) return;
+  const confirmado = await window.GymDialog.confirmar("¿Eliminar este registro? Esta acción no se puede deshacer.");
+  if (!confirmado) return;
   try {
     await deleteDoc(doc(db, "usuarios", usuarioActual.uid, "registros", boton.dataset.id));
   } catch (error) {

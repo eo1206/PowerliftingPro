@@ -909,3 +909,100 @@ button {
   font-size: 14px;
   font-weight: 600;
 }
+
+/* Mejoras v11: diálogo propio, PWA e interfaz compacta del temporizador */
+.app-dialog {
+  width: min(92vw, 390px);
+  max-width: 390px;
+  padding: 0;
+  border: 0;
+  border-radius: 24px;
+  background: transparent;
+  color: #f8fafc;
+  box-shadow: 0 24px 80px rgba(0,0,0,.55);
+}
+.app-dialog::backdrop {
+  background: rgba(2,6,23,.72);
+  backdrop-filter: blur(5px);
+}
+.app-dialog-card {
+  display: grid;
+  grid-template-columns: 46px 1fr;
+  gap: 14px;
+  padding: 22px;
+  border: 1px solid rgba(148,163,184,.15);
+  border-radius: 24px;
+  background: #1e293b;
+}
+.app-dialog-icon {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  background: rgba(239,68,68,.16);
+  color: #f87171;
+  font-size: 24px;
+  font-weight: 800;
+}
+.app-dialog[data-tipo="success"] .app-dialog-icon {
+  background: rgba(34,197,94,.16);
+  color: #4ade80;
+}
+.app-dialog[data-tipo="success"] .app-dialog-icon::before { content: "✓"; }
+.app-dialog[data-tipo="success"] .app-dialog-icon { font-size: 0; }
+.app-dialog[data-tipo="success"] .app-dialog-icon::before { font-size: 23px; }
+.app-dialog[data-tipo="warning"] .app-dialog-icon {
+  background: rgba(245,158,11,.16);
+  color: #fbbf24;
+}
+.app-dialog-copy h2 {
+  margin: 1px 0 7px;
+  font-size: 20px;
+}
+.app-dialog-copy p {
+  color: #cbd5e1;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+.app-dialog-actions {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 10px;
+  margin-top: 4px;
+}
+.app-dialog-actions button {
+  width: 100%;
+  margin: 0;
+  padding: 13px;
+}
+.app-dialog-actions button:only-child { grid-column: 1 / -1; }
+.dialog-secondary { background: #334155; }
+
+/* El temporizador ya no flota ni tapa contenido. */
+.rest-timer-card {
+  position: static;
+  z-index: auto;
+  padding: 16px;
+}
+.timer-header h2 { font-size: 31px; }
+.timer-presets,
+.timer-adjust { gap: 8px; margin-top: 9px; }
+.timer-presets button,
+.timer-adjust button,
+.secondary-button {
+  min-height: 44px;
+  padding: 9px 7px;
+  font-size: 14px;
+  border-radius: 13px;
+}
+.timer-adjust { grid-template-columns: .9fr 1.2fr .9fr; }
+#reiniciarTemporizador { margin-top: 8px; }
+.timer-status { padding: 6px 9px; }
+
+@media (max-width: 390px) {
+  .rest-timer-card { padding: 14px; }
+  .timer-header h2 { font-size: 29px; }
+  .timer-adjust button { font-size: 12px; }
+}
