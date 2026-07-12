@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GymLog | Herramientas</title>
-  <link rel="stylesheet" href="style.css?v=13">
+  <link rel="stylesheet" href="style.css?v=14">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f172a">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -26,8 +26,6 @@
     <h2>Peso a discos</h2>
 
     <input id="pesoObjetivo" type="number" placeholder="Peso total con barra">
-    <input id="pesoBarra" type="number" value="20" placeholder="Peso de la barra" readonly>
-
     <button id="calcularDiscos" type="button">Calcular discos</button>
 
     <div id="resultadoDiscos"></div>
@@ -38,15 +36,7 @@
 
     <p class="label">Cantidad por lado</p>
 
-    <div class="grid">
-      <input id="d25" type="number" placeholder="25 kg">
-      <input id="d20" type="number" placeholder="20 kg">
-      <input id="d15" type="number" placeholder="15 kg">
-      <input id="d10" type="number" placeholder="10 kg">
-      <input id="d5" type="number" placeholder="5 kg">
-      <input id="d25chico" type="number" placeholder="2.5 kg">
-      <input id="d125" type="number" placeholder="1.25 kg">
-    </div>
+    <div id="camposDiscosDisponibles" class="plate-count-grid"></div>
 
     <button id="calcularPeso" type="button">Calcular peso total</button>
 
@@ -99,17 +89,6 @@
     <div id="resultadoGL"></div>
   </section>
   
-  <section class="card settings-summary-card">
-    <div class="section-heading-row">
-      <div>
-        <p class="label">Configuración activa</p>
-        <h2>Equipo y apariencia</h2>
-      </div>
-      <button id="abrirAjustesSecundario" class="small-action" type="button">Ajustes</button>
-    </div>
-    <p id="resumenConfiguracion" class="helper-text"></p>
-  </section>
-
   <div id="panelAjustes" class="settings-overlay hidden" aria-hidden="true">
     <section class="settings-panel" role="dialog" aria-modal="true" aria-labelledby="tituloAjustes">
       <header class="settings-panel-header">
@@ -172,8 +151,7 @@
 </main>
 
 <script src="dialog.js"></script>
-<script type="module" src="settings.js"></script>
-<script type="module" src="herramientas.js"></script>
+<script type="module" src="js/pages/herramientas-page.js"></script>
 <script src="conexion.js" defer></script>
 <script src="pwa.js" defer></script>
 </body>

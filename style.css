@@ -1271,3 +1271,23 @@ body.settings-open { overflow: hidden; }
   .settings-overlay { align-items: center; }
   .settings-panel { border-radius: 26px; }
 }
+
+/* Herramientas v14: configuración centralizada */
+.plate-count-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.plate-count-field {
+  display: grid !important;
+  gap: 7px;
+  margin: 0 !important;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(51, 65, 85, .72);
+}
+.plate-count-field span { color: #cbd5e1; font-size: 13px; }
+.plate-count-field input { margin: 0 !important; height: 48px !important; }
+.tool-result { margin-top: 14px; padding: 14px; border-radius: 14px; background: rgba(15,23,42,.55); }
+.tool-result h3 { margin: 4px 0 10px; }
+@media (max-width: 360px) { .plate-count-grid { grid-template-columns: 1fr; } }
