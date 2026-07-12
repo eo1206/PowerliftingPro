@@ -81,6 +81,18 @@
     }
   };
 
+
+  // API común utilizada por los módulos de la aplicación.
+  window.appAlert = (mensaje, opciones = {}) => {
+    const { titulo = "Aviso", tipo = "info" } = opciones;
+    return mostrar({ titulo, mensaje, tipo, confirmar: false });
+  };
+
+  window.appConfirm = (mensaje, opciones = {}) => {
+    const { titulo = "Confirmar acción", tipo = "warning" } = opciones;
+    return mostrar({ titulo, mensaje, tipo, confirmar: true });
+  };
+
   // Sustituye los cuadros nativos del navegador sin cambiar el resto del código.
   window.alert = (mensaje) => {
     const texto = String(mensaje ?? "");

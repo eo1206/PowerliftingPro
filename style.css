@@ -1294,3 +1294,132 @@ body.settings-open { overflow: hidden; }
 
 /* v15: perfil, privacidad, ayuda y unidades */
 .header-actions{display:flex;align-items:center;gap:8px}.profile-link{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2,#334155);color:#fff;text-decoration:none;font-size:20px}.profile-hero{display:flex;align-items:center;gap:18px}.section-title{margin-top:24px}.privacy-option,.unit-picker label{display:flex!important;align-items:flex-start;gap:12px;padding:14px;border:1px solid rgba(148,163,184,.18);border-radius:14px;margin:8px 0}.privacy-option input,.unit-picker input{width:22px!important;height:22px!important;margin:0!important}.privacy-option span{display:flex;flex-direction:column;gap:4px}.privacy-option small,.settings-hint,.tool-help{color:#94a3b8;line-height:1.45}.tool-help{margin:-8px 0 14px}.exercise-tips{margin:10px 0;background:rgba(15,23,42,.35);border-radius:14px;padding:10px 12px}.exercise-tips summary{cursor:pointer;font-weight:700;color:var(--accent,#ef4444)}.tips-content{padding-top:10px}.tips-content ul{padding-left:20px;display:grid;gap:7px}.settings-hint{font-size:13px;margin-top:8px}@media(max-width:390px){.profile-hero{align-items:flex-start}.bottom-nav a{font-size:10px}}
+
+/* v16: temas con contraste estable y selección de ejercicios legible */
+/* El tema modifica solo acentos; las superficies conservan tonos neutros. */
+.exercise-choice,
+.exercise-choice:hover,
+.exercise-choice:focus,
+.muscle-exercise-grid .exercise-choice,
+.grouped-exercise-catalog .exercise-choice {
+  background: #334155 !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(148, 163, 184, .20) !important;
+  box-shadow: none !important;
+}
+
+.exercise-choice:hover,
+.exercise-choice:focus-visible {
+  background: #3b4a60 !important;
+  border-color: rgba(203, 213, 225, .45) !important;
+  transform: translateY(-1px);
+}
+
+.exercise-choice.selected {
+  background: #334155 !important;
+  border-color: var(--accent) !important;
+  outline: 2px solid var(--accent-soft) !important;
+  color: #fff !important;
+}
+
+.exercise-choice .exercise-choice-icon,
+.exercise-card-media,
+.exercise-card-media .exercise-choice-icon {
+  background: #1e293b !important;
+  color: var(--accent-text) !important;
+}
+
+.muscle-group,
+.edit-exercise-card,
+.add-exercise-editor {
+  background: #273449 !important;
+}
+
+.muscle-group summary {
+  background: transparent !important;
+  color: #f8fafc !important;
+}
+
+.selected-exercise-text {
+  background: #273449 !important;
+  color: #e2e8f0 !important;
+  border-left: 3px solid var(--accent);
+}
+
+/* Selector de temas más limpio: color como muestra, no como fondo completo. */
+.theme-picker {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.theme-option {
+  min-width: 0;
+  min-height: 66px;
+  padding: 8px 5px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid rgba(148, 163, 184, .22) !important;
+  border-radius: 14px;
+  background: #273449 !important;
+  color: #cbd5e1 !important;
+  font-size: 11px;
+  box-shadow: none !important;
+}
+
+.theme-option:hover,
+.theme-option:focus-visible {
+  background: #334155 !important;
+  border-color: rgba(203, 213, 225, .45) !important;
+}
+
+.theme-option span {
+  width: 25px;
+  height: 25px;
+  border: 3px solid rgba(255, 255, 255, .22);
+  box-shadow: 0 3px 9px rgba(0,0,0,.22);
+}
+
+.theme-option.selected {
+  background: #334155 !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 2px var(--accent-soft) !important;
+  color: #fff !important;
+}
+
+/* Evita que el selector global de botones pinte controles secundarios. */
+.theme-option,
+.exercise-choice,
+.icon-action,
+.settings-close,
+.dialog-secondary,
+.secondary-button {
+  background-color: #334155 !important;
+}
+
+/* Mensaje de diálogo más claro y compacto. */
+.app-dialog-card {
+  border: 1px solid rgba(148, 163, 184, .18);
+}
+
+.app-dialog[data-tipo="success"] .app-dialog-icon {
+  background: rgba(34, 197, 94, .16);
+  color: #4ade80;
+}
+
+.app-dialog[data-tipo="success"] .app-dialog-icon::before {
+  content: "✓";
+}
+
+.app-dialog[data-tipo="success"] .app-dialog-icon {
+  font-size: 0;
+}
+
+.app-dialog[data-tipo="success"] .app-dialog-icon::before {
+  font-size: 24px;
+}
+
+@media (max-width: 390px) {
+  .theme-picker { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .theme-option { min-height: 62px; }
+}
