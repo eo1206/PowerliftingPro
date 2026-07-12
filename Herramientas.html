@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GymLog | Herramientas</title>
-  <link rel="stylesheet" href="style.css?v=14">
+  <link rel="stylesheet" href="style.css?v=15">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f172a">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -19,11 +19,11 @@
       <p class="label">Calculadoras</p>
       <h1>Herramientas</h1>
     </div>
-    <button id="abrirAjustes" class="settings-icon" type="button" aria-label="Abrir ajustes" title="Ajustes">⚙</button>
+    <div class="header-actions"><a class="profile-link" href="perfil.html" aria-label="Mi usuario">👤</a><button id="abrirAjustes" class="settings-icon" type="button" aria-label="Abrir ajustes" title="Ajustes">⚙</button></div>
   </header>
 
   <section class="card">
-    <h2>Peso a discos</h2>
+    <h2>Peso a discos</h2><p class="tool-help">Escribe el peso total que quieres levantar. Te mostraremos qué discos colocar en cada lado de la barra.</p>
 
     <input id="pesoObjetivo" type="number" placeholder="Peso total con barra">
     <button id="calcularDiscos" type="button">Calcular discos</button>
@@ -32,7 +32,7 @@
   </section>
 
   <section class="card">
-    <h2>Discos a peso</h2>
+    <h2>Discos a peso</h2><p class="tool-help">Indica cuántos discos tienes puestos por cada lado. La app sumará discos y barra.</p>
 
     <p class="label">Cantidad por lado</p>
 
@@ -44,7 +44,7 @@
   </section>
 
   <section class="card">
-    <h2>Calculadora 1RM</h2>
+    <h2>Calculadora 1RM</h2><p class="tool-help">Estima el peso máximo que podrías levantar una vez usando una serie que ya realizaste.</p>
 
     <div class="grid">
       <input id="peso1rm" type="number" placeholder="Peso kg">
@@ -57,7 +57,7 @@
   </section>
 
   <section class="card">
-    <h2>Puntos IPF GL</h2>
+    <h2>Puntos IPF GL</h2><p class="tool-help">Compara rendimientos entre personas de distinto peso corporal. Es una estimación deportiva.</p>
 
     <label>Sexo</label>
     <select id="sexoGL" title="Seleccionar sexo">
@@ -132,6 +132,16 @@
         </div>
       </div>
 
+
+      <div class="settings-section">
+        <h3>Unidades</h3>
+        <p class="settings-label">Unidad principal</p>
+        <div class="unit-picker">
+          <label><input type="radio" name="unidadPreferida" value="kg"> Kilogramos (kg)</label>
+          <label><input type="radio" name="unidadPreferida" value="lb"> Libras (lb)</label>
+        </div>
+        <p class="settings-hint">Los datos se conservan internamente y la interfaz los muestra en tu unidad preferida.</p>
+      </div>
       <div class="settings-actions">
         <button id="restablecerAjustes" class="secondary-button" type="button">Restablecer</button>
         <button id="guardarAjustes" type="button">Guardar cambios</button>

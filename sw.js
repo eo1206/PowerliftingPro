@@ -1,4 +1,4 @@
-const CACHE_NAME = "gymlog-v14";
+const CACHE_NAME = "gymlog-v15";
 
 const APP_SHELL = [
   "./",

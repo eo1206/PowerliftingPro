@@ -4,6 +4,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 import { calcular1RM, escaparHTML } from "./utils.js";
+import { buscarEjercicio } from "./catalogo-ejercicios.js";
 
 const ui = {
   selector: document.getElementById("selectorRutina"),
@@ -21,6 +22,7 @@ const ui = {
 
 let usuarioActual = null;
 let nombreActual = "Usuario";
+let perfilActual = { nickname: "", privacidadRanking: "visible" };
 let rutinas = [];
 let rutinaActual = null;
 let rutinaActualId = null;
@@ -43,7 +45,7 @@ onAuthStateChanged(auth, (user) => {
   if (!user) return window.location.replace("index.html");
   usuarioActual = user;
   getDoc(doc(db, "usuarios", user.uid)).then((perfil) => {
-    if (perfil.exists()) nombreActual = perfil.data().nombre || "Usuario";
+    if (perfil.exists()) { perfilActual = perfil.data(); nombreActual = perfilActual.nombre || "Usuario"; }
   }).catch(console.warn);
   cargarRutinas();
   cargarHistorialGeneral();
@@ -129,6 +131,12 @@ function historialDesplegable(nombre) {
   </details>`;
 }
 
+function tipsDesplegable(nombre) {
+  const info = buscarEjercicio(nombre);
+  const tips = info?.tips || ["Mantén una postura estable.", "Usa un peso que puedas controlar.", "Detén la serie si aparece dolor agudo."];
+  return `<details class="exercise-tips"><summary>Ver técnica y consejos</summary><div class="tips-content"><p>${escaparHTML(info?.descripcion || "Consejos generales para realizar el ejercicio con control.")}</p><ul>${tips.map((tip)=>`<li>${escaparHTML(tip)}</li>`).join("")}</ul></div></details>`;
+}
+
 ui.selector.addEventListener("change", () => {
   const id = ui.selector.value;
   if (!id) {
@@ -162,6 +170,7 @@ function mostrarRutina(rutina) {
       ${item.imagen ? `<div class="routine-image-wrap"><img src="${escaparHTML(item.imagen)}" alt="${escaparHTML(item.ejercicio)}" class="exercise-image routine-main-image" onerror="this.parentElement.hidden=true"></div>` : ""}
       <div class="routine-top"><div><h3><span class="routine-number">${index + 1}</span>${escaparHTML(item.ejercicio)}<span class="check">${ejerciciosCompletados[index] ? "✅" : ""}</span></h3><p>${cantidadSeries} series · ${Number(item.repsObjetivo) || 1} reps objetivo</p></div></div>
       ${historialDesplegable(item.ejercicio)}
+      ${tipsDesplegable(item.ejercicio)}
       <div class="series-entry-list">
         ${Array.from({ length: cantidadSeries }, (_, serieIndex) => {
           const guardada = serieGuardada(index, serieIndex);
@@ -306,6 +315,8 @@ async function actualizarRankingDesdeHistorial() {
     await setDoc(doc(db, "ranking", usuarioActual.uid), {
       uid: usuarioActual.uid,
       nombre: nombreActual,
+      nickname: perfilActual.nickname || "",
+      privacidad: perfilActual.privacidadRanking || "visible",
       sentadilla: Number(maximos["Sentadilla"].toFixed(1)),
       banca: Number(maximos["Press banca"].toFixed(1)),
       muerto: Number(maximos["Peso muerto"].toFixed(1)),

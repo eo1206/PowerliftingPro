@@ -20,7 +20,7 @@ onAuthStateChanged(auth, (user) => {
 function escucharRanking() {
   const consulta = query(collection(db, "ranking"), orderBy("total", "desc"));
   onSnapshot(consulta, (snapshot) => {
-    usuarios = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+    usuarios = snapshot.docs.map((d) => ({ id: d.id, ...d.data() })).filter((u) => u.privacidad !== "oculto");
     renderizar();
   }, (error) => {
     console.error(error);
@@ -36,7 +36,7 @@ function renderizar() {
   lista.innerHTML = ordenados.length ? ordenados.map((u, i) => `
     <article class="ranking-row ${i < 3 ? `top-${i + 1}` : ""}">
       <span class="ranking-position">${i + 1}</span>
-      <div class="ranking-user"><strong>${escaparHTML(u.nombre || "Usuario")}</strong><small>Total: ${(Number(u.total) || 0).toFixed(1)} kg</small></div>
+      <div class="ranking-user"><strong>${escaparHTML(u.privacidad === "anonimo" ? "Usuario anónimo" : (u.nickname || u.nombre || "Usuario"))}</strong><small>Total: ${(Number(u.total) || 0).toFixed(1)} kg</small></div>
       <div class="ranking-lifts"><span>S ${(Number(u.sentadilla) || 0).toFixed(1)}</span><span>B ${(Number(u.banca) || 0).toFixed(1)}</span><span>M ${(Number(u.muerto) || 0).toFixed(1)}</span></div>
       <strong class="ranking-score">${(Number(u[campo]) || 0).toFixed(1)} kg</strong>
     </article>`).join("") : '<p class="empty">Todavía no hay usuarios en el ranking. Abre Inicio para publicar tus PR.</p>';

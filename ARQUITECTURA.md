@@ -14,3 +14,13 @@ Una página HTML debe cargar un solo módulo de `js/pages/`. Ese módulo importa
 ## Configuración
 
 Toda preferencia del usuario se administra desde `js/core/settings-store.js`. El botón de Ajustes usa `js/ui/settings-modal.js`. Las calculadoras solo leen esa configuración; no muestran controles duplicados.
+
+
+## Perfil y privacidad
+- `perfil.html` / `perfil.js`: datos del usuario y visibilidad del ranking.
+- `privacidadRanking`: `visible`, `anonimo` u `oculto`.
+- La unidad preferida vive en `js/core/settings-store.js`.
+
+## Catálogo educativo
+- `catalogo-ejercicios.js` concentra grupos, imágenes, descripciones y consejos.
+- Rutina solo consume el catálogo; no duplica textos técnicos.

@@ -20,7 +20,8 @@ function normalizarConfiguracion(valor = {}) {
     discosDisponibles: [...new Set(discos)].sort((a, b) => b - a),
     tema: ["rojo", "rosa", "azul", "morado", "verde"].includes(valor.tema)
       ? valor.tema
-      : CONFIG_PREDETERMINADA.tema
+      : CONFIG_PREDETERMINADA.tema,
+    unidad: ["kg", "lb"].includes(valor.unidad) ? valor.unidad : "kg"
   };
 }
 

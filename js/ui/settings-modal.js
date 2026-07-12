@@ -15,6 +15,7 @@ export function inicializarPanelAjustes({ onChange } = {}) {
   const pesoBarra = document.getElementById("ajustePesoBarra");
   const discos = [...document.querySelectorAll("#ajustesDiscos input[type='checkbox']")];
   const temas = [...document.querySelectorAll(".theme-option")];
+  const unidades = [...document.querySelectorAll("[name='unidadPreferida']")];
 
   function cargarFormulario() {
     const config = obtenerConfiguracion();
@@ -25,6 +26,7 @@ export function inicializarPanelAjustes({ onChange } = {}) {
     temas.forEach((boton) => {
       boton.classList.toggle("selected", boton.dataset.themeValue === config.tema);
     });
+    unidades.forEach((input) => { input.checked = input.value === config.unidad; });
   }
 
   function mostrar() {
@@ -61,6 +63,7 @@ export function inicializarPanelAjustes({ onChange } = {}) {
     const barra = Number(pesoBarra.value);
     const seleccionados = discos.filter((input) => input.checked).map((input) => Number(input.value));
     const tema = document.querySelector(".theme-option.selected")?.dataset.themeValue || "rojo";
+    const unidad = unidades.find((input) => input.checked)?.value || "kg";
 
     if (!Number.isFinite(barra) || barra < 0) {
       await window.appAlert?.("Escribe un peso de barra válido.", { titulo: "Revisa el peso", tipo: "warning" });
@@ -71,7 +74,7 @@ export function inicializarPanelAjustes({ onChange } = {}) {
       return;
     }
 
-    const config = guardarConfiguracion({ pesoBarra: barra, discosDisponibles: seleccionados, tema });
+    const config = guardarConfiguracion({ pesoBarra: barra, discosDisponibles: seleccionados, tema, unidad });
     onChange?.(config);
     ocultar();
     await window.appAlert?.("Tus preferencias se guardaron en este dispositivo.", { titulo: "Ajustes guardados", tipo: "success" });

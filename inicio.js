@@ -19,6 +19,7 @@ const prs = {
 
 let usuarioActual = null;
 let nombreActual = "Usuario";
+let perfilActual = { nickname: "", privacidadRanking: "visible" };
 let registrosNormales = [];
 let registrosRutina = [];
 let cancelarNormales = null;
@@ -40,8 +41,9 @@ onAuthStateChanged(auth, async (user) => {
 
   try {
     const perfil = await getDoc(doc(db, "usuarios", user.uid));
-    nombreActual = perfil.exists() ? (perfil.data().nombre || "Usuario") : "Usuario";
-    nombreUsuario.textContent = nombreActual;
+    perfilActual = perfil.exists() ? perfil.data() : {};
+    nombreActual = perfilActual.nombre || "Usuario";
+    nombreUsuario.textContent = perfilActual.nickname || nombreActual;
   } catch (error) {
     console.warn("No se pudo leer el perfil:", error);
   }
@@ -163,6 +165,8 @@ async function actualizarRanking(maximos) {
     await setDoc(doc(db, "ranking", usuarioActual.uid), {
       uid: usuarioActual.uid,
       nombre: nombreActual,
+      nickname: perfilActual.nickname || "",
+      privacidad: perfilActual.privacidadRanking || "visible",
       sentadilla: Number(maximos["Sentadilla"].toFixed(1)),
       banca: Number(maximos["Press banca"].toFixed(1)),
       muerto: Number(maximos["Peso muerto"].toFixed(1)),
