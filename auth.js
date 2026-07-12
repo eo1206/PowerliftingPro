@@ -13,6 +13,27 @@ const registerTab = document.getElementById("registerTab");
 const loginBox = document.getElementById("loginBox");
 const registerBox = document.getElementById("registerBox");
 
+
+function prepararBotonesContrasena() {
+  document.querySelectorAll("[data-password-target]").forEach((boton) => {
+    boton.addEventListener("click", () => {
+      const campo = document.getElementById(boton.dataset.passwordTarget);
+      if (!campo) return;
+
+      const mostrar = campo.type === "password";
+      campo.type = mostrar ? "text" : "password";
+      boton.setAttribute("aria-pressed", String(mostrar));
+      boton.setAttribute("aria-label", mostrar ? "Ocultar contraseña" : "Mostrar contraseña");
+      boton.querySelector("span").textContent = mostrar ? "🙈" : "👁";
+      campo.focus({ preventScroll: true });
+      const fin = campo.value.length;
+      campo.setSelectionRange?.(fin, fin);
+    });
+  });
+}
+
+prepararBotonesContrasena();
+
 function usuarioAEmail(nombre) {
   return `${nombre.toLowerCase().trim().replace(/\s+/g, "")}@powerlog.app`;
 }

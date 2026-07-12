@@ -181,7 +181,7 @@ calcularGL.addEventListener("click", () => {
 });
 
 // =========================
-// Ajustes de GymLog
+// Ajustes de The Gym Base
 // =========================
 const panelAjustes = document.getElementById("panelAjustes");
 const abrirAjustes = document.getElementById("abrirAjustes");

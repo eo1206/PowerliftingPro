@@ -262,7 +262,7 @@ function actualizarTemporizadorUI() {
   ui.timerTexto.textContent = formatearTiempo(segundosRestantes);
   ui.timerToggle.textContent = temporizadorActivo ? "Pausar" : (segundosRestantes === duracionBase ? "Iniciar" : "Continuar");
   ui.timerEstado.textContent = temporizadorActivo ? "Corriendo" : (segundosRestantes === 0 ? "Terminado" : "Listo");
-  document.title = temporizadorActivo ? `${formatearTiempo(segundosRestantes)} · GymLog` : "GymLog | Rutina";
+  document.title = temporizadorActivo ? `${formatearTiempo(segundosRestantes)} · The Gym Base` : "The Gym Base | Rutina";
 }
 
 function detenerTemporizador() {

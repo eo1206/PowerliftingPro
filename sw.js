@@ -1,4 +1,4 @@
-const CACHE_NAME = "gymlog-v17";
+const CACHE_NAME = "the-gym-base-v19";
 
 const APP_SHELL = [
   "./",
@@ -9,7 +9,7 @@ const APP_SHELL = [
   "./progreso.html",
   "./Herramientas.html",
   "./ranking.html",
-  "./style.css?v=13",
+  "./style.css?v=19",
   "./firebase.js",
   "./auth.js",
   "./inicio.js",

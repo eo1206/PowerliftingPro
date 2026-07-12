@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GymLog | Iniciar sesión</title>
-  <link rel="stylesheet" href="style.css?v=17">
+  <title>The Gym Base | Iniciar sesión</title>
+  <link rel="stylesheet" href="style.css?v=19">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="icon" type="image/png" href="icons/icon-192.png">
@@ -22,8 +22,8 @@
 
   <main id="authScreen" class="auth-screen hidden">
     <section class="auth-card">
-      <div class="auth-brand">GYM</div>
-      <h1>GymLog</h1>
+      <div class="auth-brand">TGB</div>
+      <h1>The Gym Base</h1>
       <p>Registra tus entrenamientos y revisa tu progreso.</p>
 
       <div class="tabs" role="tablist" aria-label="Acceso">
@@ -35,7 +35,12 @@
         <label for="loginNombre">Usuario</label>
         <input id="loginNombre" type="text" autocomplete="username" placeholder="Tu nombre de usuario" required>
         <label for="loginPassword">Contraseña</label>
-        <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Tu contraseña" required>
+        <div class="password-field">
+          <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Tu contraseña" required>
+          <button class="password-toggle" type="button" data-password-target="loginPassword" aria-label="Mostrar contraseña" aria-pressed="false">
+            <span aria-hidden="true">👁</span>
+          </button>
+        </div>
         <button id="iniciarSesion" type="submit">Entrar</button>
       </form>
 
@@ -43,9 +48,19 @@
         <label for="regNombre">Nombre de usuario</label>
         <input id="regNombre" type="text" autocomplete="username" placeholder="Elige un usuario" required>
         <label for="regPassword">Contraseña</label>
-        <input id="regPassword" type="password" autocomplete="new-password" placeholder="Mínimo 6 caracteres" required>
+        <div class="password-field">
+          <input id="regPassword" type="password" autocomplete="new-password" placeholder="Mínimo 6 caracteres" required>
+          <button class="password-toggle" type="button" data-password-target="regPassword" aria-label="Mostrar contraseña" aria-pressed="false">
+            <span aria-hidden="true">👁</span>
+          </button>
+        </div>
         <label for="regConfirmar">Confirmar contraseña</label>
-        <input id="regConfirmar" type="password" autocomplete="new-password" placeholder="Repite la contraseña" required>
+        <div class="password-field">
+          <input id="regConfirmar" type="password" autocomplete="new-password" placeholder="Repite la contraseña" required>
+          <button class="password-toggle" type="button" data-password-target="regConfirmar" aria-label="Mostrar contraseña" aria-pressed="false">
+            <span aria-hidden="true">👁</span>
+          </button>
+        </div>
         <button id="crearCuenta" type="submit">Crear cuenta</button>
       </form>
     </section>

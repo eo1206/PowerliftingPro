@@ -1,13 +1,13 @@
 {
-  "name": "GymLog",
-  "short_name": "GymLog",
+  "name": "The Gym Base",
+  "short_name": "GymBase",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
   "orientation": "portrait",
-  "description": "Registro y seguimiento de entrenamientos de gimnasio",
+  "description": "Entrenamientos, rutinas y progreso para toda la banda del gimnasio",
   "icons": [
     {
       "src": "./icons/icon-192.png",
