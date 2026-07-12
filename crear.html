@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GymLog | Crear rutina</title>
-  <link rel="stylesheet" href="style.css?v=11">
+  <title>GymLog | Rutinas</title>
+  <link rel="stylesheet" href="style.css?v=12">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f172a">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -14,42 +14,86 @@
 <div id="estadoConexion" class="estado-conexion hidden"></div>
 <main class="app">
   <header class="header">
-    <div><p class="label">Constructor</p><h1>Crear rutina</h1></div>
-    <div class="profile">PL</div>
+    <div><p class="label">Planificación</p><h1>Rutinas</h1></div>
+    <div class="profile">GY</div>
   </header>
 
-  <section class="card">
-    <h2>Nueva rutina</h2>
-    <label for="nombreRutina">Nombre de la rutina</label>
-    <input id="nombreRutina" type="text" maxlength="60" placeholder="Ej: Fuerza semana 1">
-
-    <label for="buscadorEjercicio">Buscar ejercicio</label>
-    <input id="buscadorEjercicio" type="search" placeholder="Escribe sentadilla, banca, remo..." autocomplete="off">
-
-    <p class="label">Selecciona una tarjeta</p>
-    <div id="catalogoEjercicios" class="exercise-catalog" role="listbox" aria-label="Catálogo de ejercicios"></div>
-    <p id="ejercicioSeleccionadoTexto" class="selected-exercise-text">Ningún ejercicio seleccionado</p>
-
-    <div class="grid">
-      <div>
-        <label for="seriesRutina">Series</label>
-        <input id="seriesRutina" type="number" min="1" max="20" placeholder="Ej: 5">
-      </div>
-      <div>
-        <label for="repsRutina">Reps objetivo</label>
-        <input id="repsRutina" type="number" min="1" max="100" placeholder="Ej: 3">
-      </div>
-    </div>
-
-    <button id="agregarEjercicioRutina" type="button">Agregar ejercicio</button>
+  <section class="create-tabs" aria-label="Secciones de rutinas">
+    <button id="tabRutinas" class="create-tab active" type="button">Mis rutinas</button>
+    <button id="tabCrear" class="create-tab" type="button">Crear nueva</button>
   </section>
 
-  <section class="card" id="vistaRutina">
-    <h2>Vista previa</h2>
-    <p class="empty">Agrega ejercicios para crear tu rutina.</p>
+  <section id="panelRutinas" class="create-panel">
+    <section class="card">
+      <div class="section-heading-row">
+        <div><p class="label">Guardadas</p><h2>Mis rutinas</h2></div>
+        <button id="irACrear" class="small-action" type="button">+ Nueva</button>
+      </div>
+      <div id="listaRutinasEditables"><p class="empty">Cargando rutinas...</p></div>
+    </section>
+
+    <section id="editorRutina" class="card hidden">
+      <div class="section-heading-row">
+        <div><p class="label">Edición</p><h2>Editar rutina</h2></div>
+        <button id="cerrarEditor" class="icon-action" type="button" aria-label="Cerrar editor">×</button>
+      </div>
+
+      <label for="nombreRutinaEditar">Nombre de la rutina</label>
+      <input id="nombreRutinaEditar" type="text" maxlength="60">
+
+      <div id="ejerciciosEditor"></div>
+
+      <details class="add-exercise-editor">
+        <summary>Agregar otro ejercicio</summary>
+        <div class="details-body">
+          <input id="buscadorEditor" type="search" placeholder="Buscar ejercicio..." autocomplete="off">
+          <div id="catalogoEditor" class="grouped-exercise-catalog"></div>
+        </div>
+      </details>
+
+      <div class="editor-actions">
+        <button id="guardarCambiosRutina" type="button">Guardar modificación</button>
+        <button id="eliminarRutina" class="danger-button" type="button">Eliminar rutina</button>
+      </div>
+    </section>
   </section>
 
-  <section class="card"><button id="guardarRutina" type="button">Guardar rutina</button></section>
+  <section id="panelCrear" class="create-panel hidden">
+    <section class="card">
+      <h2>Crear rutina</h2>
+      <label for="nombreRutina">Nombre de la rutina</label>
+      <input id="nombreRutina" type="text" maxlength="60" placeholder="Ej: Torso y espalda">
+
+      <label for="buscadorEjercicio">Buscar ejercicio</label>
+      <input id="buscadorEjercicio" type="search" placeholder="Busca por nombre o grupo muscular" autocomplete="off">
+
+      <div id="catalogoEjercicios" class="grouped-exercise-catalog" aria-label="Ejercicios por grupo muscular"></div>
+      <p id="ejercicioSeleccionadoTexto" class="selected-exercise-text">Selecciona un ejercicio</p>
+
+      <div id="configuracionEjercicio" class="exercise-config hidden">
+        <div class="grid">
+          <div>
+            <label for="seriesRutina">Cantidad de series</label>
+            <input id="seriesRutina" type="number" min="1" max="20" value="3">
+          </div>
+          <div>
+            <label for="repsRutina">Reps predeterminadas</label>
+            <input id="repsRutina" type="number" min="1" max="100" value="8">
+          </div>
+        </div>
+        <p class="helper-text">El porcentaje del 1RM es solo una referencia informativa. Puedes usar uno diferente en cada serie.</p>
+        <div id="seriesPlanificadas"></div>
+        <button id="agregarEjercicioRutina" type="button">Agregar a la rutina</button>
+      </div>
+    </section>
+
+    <section class="card" id="vistaRutina">
+      <h2>Vista previa</h2>
+      <p class="empty">Agrega ejercicios para crear tu rutina.</p>
+    </section>
+
+    <section class="card"><button id="guardarRutina" type="button">Guardar rutina</button></section>
+  </section>
 
   <nav class="bottom-nav">
     <a href="inicio.html">Inicio</a><a href="crear.html" class="active">Crear</a><a href="rutina.html">Rutina</a>
