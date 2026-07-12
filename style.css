@@ -1423,3 +1423,21 @@ body.settings-open { overflow: hidden; }
   .theme-picker { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .theme-option { min-height: 62px; }
 }
+
+/* v17: evita mostrar simultáneamente imagen y abreviatura */
+[hidden] { display: none !important; }
+.preview-media {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  overflow: hidden;
+  border-radius: 14px;
+  flex-shrink: 0;
+}
+.preview-media > .exercise-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
